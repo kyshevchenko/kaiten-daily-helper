@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "Kaiten daily helper (test)",
+    "version": "1.3.0",
+    "description": "Для автоматической навигации в Kaiten во время встреч.",
+    "content_scripts": [
+      {
+        "matches": ["*://kaiten.x5.ru/*"],
+        "js": ["script.js"],
+        "css": ["style.css"]
+      }
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_icon": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon2.png"
+      }
+    },
+    "icons": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon3.png"
+    },
+    "permissions": [
+      "tabs",
+      "storage"
+    ],
+    "host_permissions": [
+      "https://kaiten.x5.ru/*"
+    ]
+  }
+  
