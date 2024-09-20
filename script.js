@@ -124,7 +124,7 @@ async function createWindow() {
         block: "center",
       });
     } else {
-      console.log("Элемент с указанным текстом не найден.");
+      name && console.log(`Kaiten daily helper: Element with name ${name} not found`);
     }
   }
 
@@ -151,12 +151,14 @@ async function createWindow() {
     isRandomMode && shuffleArray(randomList); // перемешиваем список, если isRandomMode
     nextSpeakerField.textContent = "";
 
-    // костыль для поднятия списка сначала на самый верх в Кайтене
+    // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
-    firstSwimLaneElement = Array.from(laneTitleElements)[0].textContent.trim(); // получаем самый первый swim-lane элемент
-    // console.log("самый первый swim-lane элемент --->", firstSwimLaneElement)  }
+    laneTitleElements.length ?
+    firstSwimLaneElement = Array.from(laneTitleElements)[0].textContent.trim() : // получаем самый первый swim-lane элемент
+    console.log("Kaiten daily helper: Kaiten board not found"); 
+  }
 
   document
     .getElementById("generate-consistent-list")
