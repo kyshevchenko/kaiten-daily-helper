@@ -1,2 +1,2 @@
 # kaiten-daily-helper
-Chrome extension for auto navigation in Kaiten when making calls
+Chrome extension for automatic navigation in Kaiten during meetings
