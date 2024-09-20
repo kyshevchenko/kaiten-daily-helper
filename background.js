@@ -12,7 +12,7 @@ chrome.action.onClicked.addListener(() => {
         tab.id,
         { action: "toggleWindow" },
         (response) => {
-          // проверка на наличие ошибок
+          // проверка на наличие ошибок 
           if (chrome.runtime.lastError) {
             console.log(
               `Error sending message: ${chrome.runtime.lastError.message}`
