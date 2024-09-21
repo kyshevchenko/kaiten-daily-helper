@@ -10,29 +10,33 @@
     border: 1px solid #ddd;
     z-index: 9999;
     overflow: auto;
-    border-radius: 10px;
+    border-radius: 0 0 0 15px;
     padding-left: 20px;
     overflow: hidden;
 }
 
-.label,.speaker{
+.checkbox-label, #radioContainer, #speaker {
     background-color: white;
     border-radius: 3px;
     color: black;
     padding-left: 5px;
 }
+#speaker {
+    height: 5px;
+}
 
-.generate-button {
-    width: 130px;
+.start-svg {
     height: 50px;
+    width: 100px;
 }
 
 .button-form-create-list{
     position: absolute;
-    width: 120px;
+    width: 140px;
     height: 50px;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: -1px;
+    text-align: right;
 }
 
 .form-create-list{
@@ -43,18 +47,47 @@
 }
 
 .input-names {
-    width: 120px;
-    height: 50px;
-    
+    width: 150px;
+    height: 70px;
+    resize: none;
 }
+.input-names::placeholder {
+    font-family: Arial, sans-serif;
+  }
 
 .list {
-    min-height: 150px;
+    min-height: 120px;
+    width: 90%;
+    padding-top: 5px;
 }
 
-/* #button-generate-own-list {
+.plus-svg {
+    height: 25px;
+    width: 25px;
+}
 
-} */
+.x5-svg {
+    height: 150px;
+    width: 150px;
+    position: absolute;
+    bottom: -30px;
+    right: -15px;
+    opacity: 0.08;
+    transform: rotate(10deg);
+}
+
+.button-create-list{
+    height: 31px;
+}
+.button-create-list-describe {
+    display: none;
+    color: gray;
+    font-size: 13px;
+    margin: 0;
+}
+.button-form-create-list:hover .button-create-list-describe {
+    display: block;
+}
 
 /* падающий лист */
 .leaf {

@@ -1,5 +1,5 @@
 function updateIcon(isOpen) {
-  const iconPath = isOpen ? "icon3.png" : "icon2.png";
+  const iconPath = isOpen ? "icon-on.png" : "icon-off.png";
   chrome.action.setIcon({ path: iconPath });
 }
 

@@ -1,7 +1,6 @@
 let windowOpen = false;
 let randomList = [];
 let isRandomMode;
-
 // костыль для Кайтена. Чтобы сначала скролллить на самый верх до 1 элемента, а затем вниз к запрошенному спикеру
 let firstSwimLaneElement;
 
@@ -49,49 +48,48 @@ async function createWindow() {
       .map(
         (e, i) => `
     <input type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
-    <label class="label" for="name${i}">${e}</label><br>`
+    <label class="checkbox-label" for="name${i}">${e}</label><br>`
       )
       .join("");
   };
-
-  // svg падающего листа
-  const fallenLeaf = `
-<div class="leaf">
-    <svg version="1.1" id="leafSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 595.3 841.9">
-        <style type="text/css">
-            .st0{fill:#BA5517;}
-        </style>
-        <path id="XMLID_126_" class="st0" d="M115,456c0,0,124.3,70.6,129.3,70.7l-64.7,80c0,0,18,16.7,20,15.3s62-83,62-83
-        s133.2,44.2,136.7,42.3c3.8-2.1-18.7-58.7-18.7-58.7s79.3-22.7,78.7-25.3c-0.7-2.7-20.7-22-20.7-22L505,426c0,0-52-10.7-52-13.3
-        c0-2.7,6.7-30,6.7-30l-65.3,4.7L429,320l-46.7-6l6.7-92l-68,66l-37.3-28l-22,75.3l-40.7-56l-17.3,30l-43.3-34.7l19.3,92.7L136.3,356
-        l23.3,64.9L115,456z"/>
-    </svg>
-</div>`;
-  // svg падающего листа
 
   container.innerHTML = `
       <div >
         <div class="list" id="list">
         ${generateHTMLList(dailyList)}
         </div id="list">
+
         <br/>
-        <button class="generate-button" id="generate-consistent-list">Запустить последовательный список</button>
-        <button class="generate-button" id="generate-random-list">Запустить рандомный список</button>
+        <div id="radioContainer">
+        <input checked type="radio" value="true" id="consistent-mode" name="mode"/>
+        <label for="consistent-mode">Последовательный порядок</label>
+        <br/>
+        <input type="radio" value="false" id="random-mode" name="mode"/>
+        <label for="random-mode">Перемешать</label>
+        </div>
+        <br/>
+
+        <button id="start-button">Начать</button>
         <br/><br/>
 
-        <button class="button-form-create-list" id="button-form-create-list">Создать свой список</button>
+        <div class="button-form-create-list" id="button-form-create-list">
+        <button class="button-create-list" >${plusSvg}</button>
+        <p class="button-create-list-describe">Создать свой список</p>
+        </div>
 
         <div class="form-create-list" id="form-create-list">
         <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
         <br/><br/>
         <button id="button-generate-own-list">Создать</button>
+        <button id="button-cancel-own-list">Отмена</button>
         </div>
 
         <button id="next-name">Кто следующий?</button>
-        ${fallenLeaf}
       </div>
-      <p class="speaker" id="speaker"></p>
-      <br/><br/>
+      ${fallenLeafSvg}
+      ${x5Svg}
+      <p class="speaker" id="speaker"/></p>
+      <br/>
     `;
   document.body.appendChild(container);
   const nextSpeakerField = document.getElementById("speaker");
@@ -124,7 +122,8 @@ async function createWindow() {
         block: "center",
       });
     } else {
-      name && console.log(`Kaiten daily helper: Element with name ${name} not found`);
+      name &&
+        console.log(`Kaiten daily helper: Element with name ${name} not found`);
     }
   }
 
@@ -149,30 +148,32 @@ async function createWindow() {
         randomList.push(checkbox.nextElementSibling.textContent);
     });
     isRandomMode && shuffleArray(randomList); // перемешиваем список, если isRandomMode
-    nextSpeakerField.textContent = "";
+    nextSpeakerField.textContent = "???";
 
     // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
-    laneTitleElements.length ?
-    firstSwimLaneElement = Array.from(laneTitleElements)[0].textContent.trim() : // получаем самый первый swim-lane элемент
-    console.log("Kaiten daily helper: Kaiten board not found"); 
+    laneTitleElements.length
+      ? (firstSwimLaneElement =
+          Array.from(laneTitleElements)[0].textContent.trim()) // получаем самый первый swim-lane элемент
+      : console.log("Kaiten daily helper: Kaiten board not found");
   }
 
+  // слушатель радио кнопок
   document
-    .getElementById("generate-consistent-list")
-    .addEventListener("click", () => {
-      isRandomMode = false;
-      generateList();
+    .getElementById("radioContainer")
+    .addEventListener("change", (event) => {
+      if (event.target.name === "mode") {
+        isRandomMode = event.target.value === "false";
+        console.log("isRandomMode --->", isRandomMode);
+      }
     });
 
-  document
-    .getElementById("generate-random-list")
-    .addEventListener("click", () => {
-      isRandomMode = true;
-      generateList();
-    });
+  // кнопка start
+  document.getElementById("start-button").addEventListener("click", () => {
+    generateList();
+  });
 
   // переключение следующего спикера
   nextButton.addEventListener("click", () => {
@@ -203,14 +204,13 @@ async function createWindow() {
           nextButton.disabled = true;
         }
 
-        nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров 
+        nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
         randomList.shift(); // удаляем первый элемент
       } else if (randomList.length < 1) {
         // randomList[0] = "Сначала сгенерируйте новый список"; // TODO добавить текст после окончания
       }
     }, 700);
 
-    // console.log("randomList[0] --->", randomList[0]);
     animateLeaf(); // включаем падающий лист
   });
 
@@ -219,18 +219,25 @@ async function createWindow() {
     .getElementById("button-generate-own-list")
     .addEventListener("click", () => {
       const inputNames = document.getElementById("input-names");
-      console.log("inputNames.value --->", inputNames.value);
+      // console.log("inputNames.value --->", inputNames.value);
       saveListToStorage(inputNames.value.split(", "));
 
       // скрываем форму добавления нового списка и показываем снова кнопку добавления
-      formCreateList.style.display = "none";
-
+      formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
+      buttonFormCreateList.style.display = "block";
       const list = document.getElementById("list");
       list.innerHTML = generateHTMLList(inputNames.value.split(", "));
+    });
+
+  // кнопка отмены создания нового списка
+  document
+    .getElementById("button-cancel-own-list")
+    .addEventListener("click", () => {
+      formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
       buttonFormCreateList.style.display = "block";
     });
 
-  // кнопка показать/скрыть форму для создания нового списка
+  // кнопка "+" показать/скрыть форму для создания нового списка
   document
     .getElementById("button-form-create-list")
     .addEventListener("click", () => {
@@ -258,8 +265,8 @@ function toggleWindow() {
     // console.log("Toggled window");
 
     //скрываем форму создания нового списка и показываем кнопку
-    formCreateListDisplay = document.getElementById("form-create-list");
-    formCreateListDisplay.style.display = "none";
+    formCreateList = document.getElementById("form-create-list");
+    formCreateList.style.display = "none";
     buttonFormCreateList = document.getElementById("button-form-create-list");
     buttonFormCreateList.style.display = "block";
   } else {
