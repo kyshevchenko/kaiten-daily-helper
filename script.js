@@ -1,10 +1,10 @@
 let windowOpen = false;
-let randomList = [];
+let randomList = []; // список для отображения кадого следующего спикера
 let isRandomMode;
 // костыль для Кайтена. Чтобы сначала скролллить на самый верх до 1 элемента, а затем вниз к запрошенному спикеру
 let firstSwimLaneElement;
 
-// список по умолчанию
+// список по умолчанию при первом запуске расширения
 let dailyList = [
   "Яна",
   "Саша",
@@ -103,17 +103,13 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    // const laneTitleElements = document.querySelectorAll("div.v5-v5244"); // TODO удалить
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
-    // console.log("laneTitleElements --->", laneTitleElements);
 
     const matchingElements = Array.from(laneTitleElements).filter((element) => {
       return element.textContent.trim() === name;
     });
-
-    // console.log("matchingElements ----->", matchingElements);
 
     // Если найдены элементы, прокручиваем к первому найденному (в Кайтене все равно прокручивает к низшей области блока :()
     if (matchingElements.length > 0) {
@@ -262,7 +258,6 @@ function toggleWindow() {
     const newDisplay = container.style.display === "none" ? "block" : "none";
     container.style.display = newDisplay;
     windowOpen = newDisplay === "block";
-    // console.log("Toggled window");
 
     //скрываем форму создания нового списка и показываем кнопку
     formCreateList = document.getElementById("form-create-list");
@@ -272,7 +267,6 @@ function toggleWindow() {
   } else {
     createWindow();
     windowOpen = true;
-    // console.log("Created window");
   }
 }
 
@@ -325,7 +319,7 @@ function animateLeaf() {
 }
 // функции падающего листа для осени
 
-// слушатель фонового обработчика
+// слушатель фонового обработчика backgrounds.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "toggleWindow") {
     toggleWindow();
