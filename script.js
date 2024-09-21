@@ -69,7 +69,7 @@ async function createWindow() {
         </div>
         <br/>
 
-        <button id="start-button">Начать</button>
+        <button class="bubbly-button" id="start-button">Начать</button>
         <br/><br/>
 
         <div class="button-form-create-list" id="button-form-create-list">
@@ -80,11 +80,11 @@ async function createWindow() {
         <div class="form-create-list" id="form-create-list">
         <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
         <br/><br/>
-        <button id="button-generate-own-list">Создать</button>
-        <button id="button-cancel-own-list">Отмена</button>
+        <button class="bubbly-button" id="button-generate-own-list">Создать</button>
+        <button class="bubbly-button" id="button-cancel-own-list">Отмена</button>
         </div>
 
-        <button id="next-name">Кто следующий?</button>
+        <button class="bubbly-button" id="next-name">Кто следующий?</button>
       </div>
       ${fallenLeafSvg}
       ${x5Svg}
@@ -92,9 +92,10 @@ async function createWindow() {
       <br/>
     `;
   document.body.appendChild(container);
+  const inputNames = document.getElementById("input-names");
   const nextSpeakerField = document.getElementById("speaker");
-  const nextButton = document.getElementById("next-name");
-  nextButton.disabled = true;
+  const nextNameButton = document.getElementById("next-name");
+  nextNameButton.disabled = true;
   const formCreateList = document.getElementById("form-create-list");
   formCreateList.style.display = "none"; // TODO заменить на css, убрать дублирование
   const buttonFormCreateList = document.getElementById(
@@ -137,7 +138,7 @@ async function createWindow() {
   function generateList() {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     randomList = [];
-    nextButton.disabled = false;
+    nextNameButton.disabled = false;
 
     checkboxes.forEach((checkbox) => {
       checkbox.checked &&
@@ -172,7 +173,7 @@ async function createWindow() {
   });
 
   // переключение следующего спикера
-  nextButton.addEventListener("click", () => {
+  nextNameButton.addEventListener("click", () => {
     scrollToText(firstSwimLaneElement); // понимаемся всегда сначала наверх к 1му swim-lane
 
     // через 0.7 секунды идем вниз к доске выступающего
@@ -197,7 +198,7 @@ async function createWindow() {
       if (randomList.length > 0) {
         if (randomList.length === 1) {
           randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
-          nextButton.disabled = true;
+          nextNameButton.disabled = true;
         }
 
         nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
@@ -214,8 +215,8 @@ async function createWindow() {
   document
     .getElementById("button-generate-own-list")
     .addEventListener("click", () => {
-      const inputNames = document.getElementById("input-names");
-      // console.log("inputNames.value --->", inputNames.value);
+      if (!inputNames.value) return;
+
       saveListToStorage(inputNames.value.split(", "));
 
       // скрываем форму добавления нового списка и показываем снова кнопку добавления
@@ -243,6 +244,12 @@ async function createWindow() {
       // скрываем саму кнопку
       buttonFormCreateList.style.display = "none";
     });
+
+  // анимация бабл-кнопки
+  const bubblyButtons = document.getElementsByClassName("bubbly-button");
+  for (var i = 0; i < bubblyButtons.length; i++) {
+    bubblyButtons[i].addEventListener("click", animateButton, false);
+  }
 }
 
 // сохранение своего списка в хранлище Хрома
@@ -326,3 +333,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ windowOpen });
   }
 });
+
+// Анимация бабл-кнопки
+function animateButton(e) {
+  e.preventDefault;
+  //reset animation
+  e.target.classList.remove("animate");
+
+  e.target.classList.add("animate");
+  setTimeout(function () {
+    e.target.classList.remove("animate");
+  }, 700);
+}
+// Анимация бабл-кнопки
