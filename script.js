@@ -72,9 +72,9 @@ async function createWindow() {
         <button class="bubbly-button" id="start-button">Начать</button>
         <br/><br/>
 
-        <div class="button-form-create-list" id="button-form-create-list">
+        <div class="button-form-create-list tooltip-container" id="button-form-create-list">
         <button class="button-create-list" >${plusSvg}</button>
-        <p class="button-create-list-describe">Создать свой список</p>
+        <p class="button-create-list-describe tooltip">Создать свой список</p>
         </div>
 
         <div class="form-create-list" id="form-create-list">
