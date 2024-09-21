@@ -24,10 +24,8 @@
 #speaker {
     height: 5px;
 }
-
-.start-svg {
-    height: 50px;
-    width: 100px;
+#start-button {
+    margin-top: 10px;
 }
 
 .button-form-create-list{
@@ -88,6 +86,26 @@
 .button-form-create-list:hover .button-create-list-describe {
     display: block;
 }
+
+/* прогресс-бар */
+#progress-container {
+    border: 2px solid black;
+    border-radius: 15px; /* Увеличить радиус для соответствия */
+    height: 30px;
+    width: 90%;
+    padding: 0;
+    overflow: hidden; /* Важный момент для обрезки прогресс-бара по краям */
+    box-sizing: border-box;
+}
+
+#progress-bar {
+    height: 100%; /* Сделать высоту 100%, чтобы она всегда совпадала с контейнером */
+    width: 0;
+    background-color: #5a74eb;
+    border-radius: 15px 0 0 15px; /* Закруглить только левую сторону */
+    transition: width 1.5s ease;
+}
+/* прогресс-бар */
 
 /* падающий лист */
 .leaf {

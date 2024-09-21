@@ -3,7 +3,8 @@ let randomList = []; // список для отображения кадого 
 let isRandomMode;
 // костыль для Кайтена. Чтобы сначала скролллить на самый верх до 1 элемента, а затем вниз к запрошенному спикеру
 let firstSwimLaneElement;
-
+let currentStepProgress = 0; // шаг для прогресс-бара
+let totalStepProgress;
 // список по умолчанию при первом запуске расширения
 let dailyList = [
   "Яна",
@@ -67,7 +68,6 @@ async function createWindow() {
         <input type="radio" value="false" id="random-mode" name="mode"/>
         <label for="random-mode">Перемешать</label>
         </div>
-        <br/>
 
         <button id="start-button">Начать</button>
         <br/><br/>
@@ -90,16 +90,36 @@ async function createWindow() {
       ${x5Svg}
       <p class="speaker" id="speaker"/></p>
       <br/>
+
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+      </div>
     `;
   document.body.appendChild(container);
   const nextSpeakerField = document.getElementById("speaker");
-  const nextButton = document.getElementById("next-name");
-  nextButton.disabled = true;
+  const nextNameButton = document.getElementById("next-name");
+  nextNameButton.disabled = true;
+   
+  // прогресс-бар
+  const progressBar = document.getElementById("progress-bar");
+  const progressContainer = document.getElementById("progress-bar");
+
   const formCreateList = document.getElementById("form-create-list");
   formCreateList.style.display = "none"; // TODO заменить на css, убрать дублирование
   const buttonFormCreateList = document.getElementById(
     "button-form-create-list"
   );
+
+  // функция для заполнения прогресс-бара
+  function updateProgressBar () {
+    currentStepProgress += 1;
+
+    if (currentStepProgress <= totalStepProgress) {
+      progressPercentage = (currentStepProgress / totalStepProgress) * 100;
+      progressBar.style.width = `${progressPercentage}%`;
+      progressContainer.textContent = `${currentStepProgress}/${totalStepProgress}`;
+    }
+  }
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
@@ -137,13 +157,17 @@ async function createWindow() {
   function generateList() {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     randomList = [];
-    nextButton.disabled = false;
+    progressBar.style.width = 0;
+    progressContainer.textContent = "";
+    currentStepProgress = 0;
+    nextNameButton.disabled = false;
 
     checkboxes.forEach((checkbox) => {
       checkbox.checked &&
         randomList.push(checkbox.nextElementSibling.textContent);
     });
     isRandomMode && shuffleArray(randomList); // перемешиваем список, если isRandomMode
+    totalStepProgress = randomList.length; // задаем длину общего прогресс-бара и сбрасываем текущий прогресс
     nextSpeakerField.textContent = "???";
 
     // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
@@ -162,7 +186,6 @@ async function createWindow() {
     .addEventListener("change", (event) => {
       if (event.target.name === "mode") {
         isRandomMode = event.target.value === "false";
-        console.log("isRandomMode --->", isRandomMode);
       }
     });
 
@@ -172,7 +195,7 @@ async function createWindow() {
   });
 
   // переключение следующего спикера
-  nextButton.addEventListener("click", () => {
+  nextNameButton.addEventListener("click", () => {
     scrollToText(firstSwimLaneElement); // понимаемся всегда сначала наверх к 1му swim-lane
 
     // через 0.7 секунды идем вниз к доске выступающего
@@ -194,10 +217,12 @@ async function createWindow() {
         scrolltoTop(); // поднимаем вверх еще 4 раза, докручиваем до 1й верхней таблички
       }
 
+      updateProgressBar(); // двигаем прогресс-бар
+
       if (randomList.length > 0) {
         if (randomList.length === 1) {
           randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
-          nextButton.disabled = true;
+          nextNameButton.disabled = true;
         }
 
         nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
@@ -207,7 +232,7 @@ async function createWindow() {
       }
     }, 700);
 
-    animateLeaf(); // включаем падающий лист
+    animateLeaf(); // включаем анимацию падающий лист
   });
 
   // создание своего нового списка
