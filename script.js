@@ -163,7 +163,6 @@ async function createWindow() {
     .addEventListener("change", (event) => {
       if (event.target.name === "mode") {
         isRandomMode = event.target.value === "false";
-        console.log("isRandomMode --->", isRandomMode);
       }
     });
 
@@ -178,7 +177,7 @@ async function createWindow() {
 
     // через 0.7 секунды идем вниз к доске выступающего
     setTimeout(() => {
-      scrollToText(randomList[0]);
+      scrollToText(randomList[0].trim());
 
       // костыль для корректного скролла наверх к самому первому спикеру
       if (randomList[0] === firstSwimLaneElement) {
@@ -217,13 +216,14 @@ async function createWindow() {
     .addEventListener("click", () => {
       if (!inputNames.value) return;
 
-      saveListToStorage(inputNames.value.split(", "));
+      const namesArray = inputNames.value.replace(/\n/g, '').split(",");
+      saveListToStorage(namesArray);
 
       // скрываем форму добавления нового списка и показываем снова кнопку добавления
       formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
       buttonFormCreateList.style.display = "block";
       const list = document.getElementById("list");
-      list.innerHTML = generateHTMLList(inputNames.value.split(", "));
+      list.innerHTML = generateHTMLList(namesArray);
     });
 
   // кнопка отмены создания нового списка
