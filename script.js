@@ -177,7 +177,7 @@ async function createWindow() {
 
     // через 0.7 секунды идем вниз к доске выступающего
     setTimeout(() => {
-      scrollToText(randomList[0].trim());
+      scrollToText(randomList[0]);
 
       // костыль для корректного скролла наверх к самому первому спикеру
       if (randomList[0] === firstSwimLaneElement) {
