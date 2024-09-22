@@ -3,8 +3,8 @@
     display: block;
     top: 0;
     right: 0;
-    width: 310px;
-    min-height: 320px;
+    width: 300px;
+    min-height: 200px;
     height: auto;
     background-color: white;
     border: 1px solid #ddd;
@@ -19,15 +19,21 @@
     background-color: white;
     border-radius: 3px;
     color: black;
+    font-family: Arial, sans-serif;
     padding-left: 5px;
 }
 #speaker {
     height: 5px;
 }
 
-.start-svg {
-    height: 50px;
-    width: 100px;
+#start-button, #next-name {
+    display: flex;
+    align-items: center;
+}
+.bottom-button-container {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
 }
 
 .button-form-create-list{
@@ -66,27 +72,30 @@
     width: 25px;
 }
 
+.button-create-list{
+    height: 31px;
+}
+.button-form-create-list:hover .button-create-list-describe {
+    display: block;
+}
+
+/* x5 svg */
 .x5-svg {
     height: 150px;
     width: 150px;
     position: absolute;
-    bottom: -30px;
-    right: -15px;
-    opacity: 0.08;
+    bottom: -35px;
+    right: -20px;
+    opacity: 0.06;
     transform: rotate(10deg);
 }
 
-.button-create-list{
-    height: 31px;
-}
-.button-create-list-describe {
-    display: none;
-    color: gray;
-    font-size: 13px;
-    margin: 0;
-}
-.button-form-create-list:hover .button-create-list-describe {
-    display: block;
+/* update svg */
+.update-svg {
+    height: 16px;
+    width: 16px;
+    color: white;
+    padding-left: 5px;
 }
 
 /* падающий лист */
@@ -230,7 +239,7 @@
   .tooltip-container .tooltip {
     visibility: hidden;
     width: 120px;
-    background-color: #555;
+    background-color: #808080;
     color: #fff;
     font-size: 10px;
     text-align: center;
@@ -241,7 +250,7 @@
     position: absolute;
     z-index: 1;
     right: 100%;
-    top: 50%;
+    top: 10%;
     transform: translateX(-10px);
     opacity: 0;
     transition: opacity 0.3s;
@@ -256,12 +265,12 @@
     margin-top: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent transparent transparent #555;
+    border-color: transparent transparent transparent #808080;
   }
 
   /* Показать подсказку при наведении */
   .tooltip-container:hover .tooltip {
     visibility: visible;
-    opacity: 1;
+    opacity: 0.8;
   }
 /* подсказка */

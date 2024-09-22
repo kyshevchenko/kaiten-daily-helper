@@ -21,7 +21,6 @@ function getListFromStorage() {
     chrome.storage.sync.get("ownList", (result) => {
       if (result.ownList) {
         dailyList = result.ownList;
-        // console.log("Список загружен из хрома: ", dailyList);
       } else {
         console.log("Своего списка в хранилище нет");
       }
@@ -67,10 +66,7 @@ async function createWindow() {
         <input type="radio" value="false" id="random-mode" name="mode"/>
         <label for="random-mode">Перемешать</label>
         </div>
-        <br/>
 
-        <button class="bubbly-button" id="start-button">Начать</button>
-        <br/><br/>
 
         <div class="button-form-create-list tooltip-container" id="button-form-create-list">
         <button class="button-create-list" >${plusSvg}</button>
@@ -84,12 +80,16 @@ async function createWindow() {
         <button class="bubbly-button" id="button-cancel-own-list">Отмена</button>
         </div>
 
+        <div class="bottom-button-container">
+        <button class="bubbly-button" id="start-button">Начать${updateSvg}</button>
         <button class="bubbly-button" id="next-name">Кто следующий?</button>
+        </div>
+
       </div>
-      ${fallenLeafSvg}
-      ${x5Svg}
       <p class="speaker" id="speaker"/></p>
       <br/>
+      ${fallenLeafSvg}
+      ${x5Svg}
     `;
   document.body.appendChild(container);
   const inputNames = document.getElementById("input-names");
