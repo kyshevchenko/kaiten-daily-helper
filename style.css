@@ -22,6 +22,14 @@
     font-family: Arial, sans-serif;
     padding-left: 5px;
 }
+.checkbox-label {
+  cursor: pointer;
+  transition: font-size 0.2s ease, transform 0.2s ease;
+}
+.checkbox-label:active {
+  font-size: 0.90em;
+}
+
 #speaker {
     height: 5px;
 }

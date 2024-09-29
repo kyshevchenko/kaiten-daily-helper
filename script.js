@@ -58,7 +58,7 @@ async function createWindow() {
         (e, i) => `
     <div id="checkboxContainer">
       <input class="checkbox-extension" type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
-      <label class="checkbox-label" for="name${i}">${e}</label><br>
+      <label class="checkbox-label">${e}</label><br>
     </div>`
       )
       .join("");
@@ -129,16 +129,12 @@ async function createWindow() {
   function scrollToText(name) {
     clearAllTimeout([timer1, timer2, timer3, timer4]); // убираем все таймауты скролла предыдущего клика //
 
-    nextSpeakerField.style.color = "black";
-
     // опускаемся сначала к самому низкому элементу при isRandomMode
     if (isRandomMode && lastSwimLaneElement) {
       lastSwimLaneElement.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    } else if (!lastSwimLaneElement) {
-      console.log("Kaiten daily helper: Kaiten board not found");
     }
 
     // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
@@ -211,19 +207,6 @@ async function createWindow() {
       }
     } else {
       name && console.log(`Kaiten daily helper: Speaker ${name} not found`);
-    }
-
-    // Обновление списка спикеров
-    if (randomList.length > 0) {
-      if (randomList.length === 1) {
-        randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
-        nextNameButton.disabled = true;
-      }
-
-      nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
-      randomList.shift(); // удаляем первый элемент
-    } else if (randomList.length < 1) {
-      // TODO добавить текст/функционал после окончания
     }
   }
 
@@ -325,7 +308,15 @@ async function createWindow() {
       }
     });
 
-  // кнопка start
+  // слушатель label имен
+  const labels = Array.from(document.getElementsByClassName("checkbox-label"));
+  labels.forEach((e) =>
+    e.addEventListener("click", () => {
+      scrollToText(e.textContent);
+    })
+  );
+
+  // слушатель кнопка start
   document.getElementById("start-button").addEventListener("click", () => {
     generateList();
   });
@@ -333,6 +324,20 @@ async function createWindow() {
   // переключение следующего спикера // TODO нужно переписать всю логику слушателя
   nextNameButton.addEventListener("click", () => {
     scrollToText(randomList[0]);
+
+    // Обновление списка спикеров
+    if (randomList.length > 0) {
+      nextSpeakerField.style.color = "black";
+      if (randomList.length === 1) {
+        randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
+        nextNameButton.disabled = true;
+      }
+
+      nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
+      randomList.shift(); // удаляем первый элемент
+    } else if (randomList.length < 1) {
+      // TODO добавить текст/функционал после окончания
+    }
 
     animateLeaf(); // включаем падающий лист
   });
@@ -350,14 +355,13 @@ async function createWindow() {
       const sortedListNames = saveListToStorage(namesArray);
 
       if (sortedListNames) {
-              // скрываем форму добавления нового списка и показываем снова кнопку добавления
-      formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
-      buttonFormCreateList.style.display = "block";
-      list.innerHTML = generateHTMLList(sortedListNames);
+        // скрываем форму добавления нового списка и показываем снова кнопку добавления
+        formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
+        buttonFormCreateList.style.display = "block";
+        list.innerHTML = generateHTMLList(sortedListNames);
       } else {
-        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Исправьте список и сохраните еще раз.`
+        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Исправьте список и сохраните еще раз.`;
       }
-
     });
 
   // кнопка отмены создания нового списка
