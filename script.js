@@ -1,8 +1,18 @@
 let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
+let consistentList = []; // последовательный список // TODO для будущего разделения списков
 let isRandomMode;
-// костыль для Кайтена. Чтобы сначала скролллить на самый верх до 1 элемента, а затем вниз к запрошенному спикеру
-let firstSwimLaneElement;
+let firstSwimLaneElement; // самый первый swim-lane на доске
+let currentSwimLane;
+let lastSwimLaneElement; // самый последний из списка пользователя
+let maxIndex = 0;
+let listIndexes = {}; // хранилище { имя: lane-title-index }
+let timer1; // для отсроченного поднятие на вершину первого элемента
+let timer2;
+let timer3;
+let timer4;
+let allElements; // вообще все laneTitleElements на сайте
+let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
 
 // список по умолчанию при первом запуске расширения
 let dailyList = [
@@ -22,7 +32,7 @@ function getListFromStorage() {
       if (result.ownList) {
         dailyList = result.ownList;
       } else {
-        console.log("Своего списка в хранилище нет");
+        console.log("Kaiten daily helper: No own list in chrome's storage");
       }
       resolve();
     });
@@ -46,8 +56,10 @@ async function createWindow() {
     return list
       .map(
         (e, i) => `
-    <input type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
-    <label class="checkbox-label" for="name${i}">${e}</label><br>`
+    <div id="checkboxContainer">
+      <input class="checkbox-extension" type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
+      <label class="checkbox-label" for="name${i}">${e}</label><br>
+    </div>`
       )
       .join("");
   };
@@ -60,10 +72,10 @@ async function createWindow() {
 
         <br/>
         <div id="radioContainer">
-        <input checked type="radio" value="true" id="consistent-mode" name="mode"/>
-        <label for="consistent-mode">Последовательный порядок</label>
+        <input class="radio-extension" checked type="radio" value="true" id="consistent-mode" name="mode"/>
+        <label class="radio-label-extension"for="consistent-mode">Последовательный порядок</label>
         <br/>
-        <input type="radio" value="false" id="random-mode" name="mode"/>
+        <input class="radio-extension" type="radio" value="false" id="random-mode" name="mode"/>
         <label for="random-mode">Перемешать</label>
         </div>
 
@@ -75,13 +87,14 @@ async function createWindow() {
 
         <div class="form-create-list" id="form-create-list">
         <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
-        <br/><br/>
-        <button class="bubbly-button" id="button-generate-own-list">Создать</button>
+        <br/>
+        <br/>
+        <button class="bubbly-button" id="button-generate-own-list">Сохранить</button>
         <button class="bubbly-button" id="button-cancel-own-list">Отмена</button>
         </div>
 
         <div class="bottom-button-container">
-        <button class="bubbly-button" id="start-button">Начать${updateSvg}</button>
+        <button class="bubbly-button" id="start-button">Начать заново${updateSvg}</button>
         <button class="bubbly-button" id="next-name">Кто следующий?</button>
         </div>
 
@@ -92,6 +105,7 @@ async function createWindow() {
       ${x5Svg}
     `;
   document.body.appendChild(container);
+  const list = document.getElementById("list");
   const inputNames = document.getElementById("input-names");
   const nextSpeakerField = document.getElementById("speaker");
   const nextNameButton = document.getElementById("next-name");
@@ -102,25 +116,114 @@ async function createWindow() {
     "button-form-create-list"
   );
 
+  // Функция для очистки всех тайм-аутов
+  function clearAllTimeout(timersArray) {
+    let count = 1;
+    while (count < timersArray.length) {
+      timersArray[count] && clearTimeout(timersArray[count]);
+      count += 1;
+    }
+  }
+
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
+    clearAllTimeout([timer1, timer2, timer3, timer4]); // убираем все таймауты скролла предыдущего клика //
+
+    nextSpeakerField.style.color = "black";
+
+    // опускаемся сначала к самому низкому элементу при isRandomMode
+    if (isRandomMode && lastSwimLaneElement) {
+      lastSwimLaneElement.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else if (!lastSwimLaneElement) {
+      console.log("Kaiten daily helper: Kaiten board not found");
+    }
+
+    // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
 
+    // Отфильтровываем, оставляем все laneTitleElements, содержащие имена спикеров // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const matchingElements = Array.from(laneTitleElements).filter((element) => {
       return element.textContent.trim() === name;
     });
 
-    // Если найдены элементы, прокручиваем к первому найденному (в Кайтене все равно прокручивает к низшей области блока :()
     if (matchingElements.length > 0) {
-      matchingElements[0].scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      currentSwimLane = matchingElements[0];
+      const allElements = Array.from(laneTitleElements);
+
+      const targetIndex = Array.from(laneTitleElements).findIndex(
+        (e) => e === matchingElements[0]
+      );
+
+      // Определяем предыдущий swim-lane чтобы осуществлять прокрутку до него при isRandomMode
+      let targetElem =
+        targetIndex > 0 && isRandomMode
+          ? allElements[targetIndex - 1]
+          : matchingElements[0];
+
+      timer2 = setTimeout(() => {
+        scrolltoTop(); // вызываем доп поднятие, если это самый первый swim-lane. А так же, если этой 2й swim-lane и 1й свернут
+
+        if (isRandomMode) {
+          targetElem.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        } else {
+          matchingElements[0].scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          timer3 = setTimeout(() => {
+            allElements[targetIndex - 1] &&
+              allElements[targetIndex - 1].scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+          }, 700);
+        }
+      }, 700);
+
+      // доп функция для поднятия к первому элементу, если это самый 1й swim-lane или 2й
+      function scrolltoTop() {
+        if (targetIndex === 0) {
+          matchingElements[0].scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          timer1 = setTimeout(() => {
+            let currentIteration = 2;
+            while (10 > currentIteration) {
+              timer4 = setTimeout(() => {
+                matchingElements[0].scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }, currentIteration * 300); // идем еще чуть выше для Яны каждые 0.15 секунды // TODO переписать
+              currentIteration = currentIteration + 1;
+            }
+          }, 500);
+        }
+      }
     } else {
-      name &&
-        console.log(`Kaiten daily helper: Element with name ${name} not found`);
+      name && console.log(`Kaiten daily helper: Speaker ${name} not found`);
+    }
+
+    // Обновление списка спикеров
+    if (randomList.length > 0) {
+      if (randomList.length === 1) {
+        randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
+        nextNameButton.disabled = true;
+      }
+
+      nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
+      randomList.shift(); // удаляем первый элемент
+    } else if (randomList.length < 1) {
+      // TODO добавить текст/функционал после окончания
     }
   }
 
@@ -138,23 +241,79 @@ async function createWindow() {
   function generateList() {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     randomList = [];
-    nextNameButton.disabled = false;
 
     checkboxes.forEach((checkbox) => {
       checkbox.checked &&
         randomList.push(checkbox.nextElementSibling.textContent);
     });
     isRandomMode && shuffleArray(randomList); // перемешиваем список, если isRandomMode
-    nextSpeakerField.textContent = "???";
 
-    // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
+    nextSpeakerField.textContent = "Список обновлен";
+    nextSpeakerField.style.color = "rgba(128, 128, 128, 0.5)";
+
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
-    laneTitleElements.length
-      ? (firstSwimLaneElement =
-          Array.from(laneTitleElements)[0].textContent.trim()) // получаем самый первый swim-lane элемент
-      : console.log("Kaiten daily helper: Kaiten board not found");
+
+    if (laneTitleElements.length) {
+      // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
+      firstSwimLaneElement =
+        Array.from(laneTitleElements)[0].textContent.trim(); // получаем самый первый swim-lane элемент name
+
+      // а теперь получаем самый нижний элемент чтобы опускаться в самый низ при рандомного скролле
+      for (const name of randomList) {
+        const matchingElements = Array.from(laneTitleElements).filter(
+          (element) => {
+            return element.textContent.trim() === name;
+          }
+        );
+
+        allElements = Array.from(laneTitleElements);
+        const targetIndex = Array.from(laneTitleElements).findIndex(
+          (e) => e === matchingElements[0]
+        );
+
+        const prevElem =
+          targetIndex > 0 ? allElements[targetIndex - 1] : matchingElements[0];
+
+        listIndexes[name] = targetIndex;
+      }
+
+      for (const key in listIndexes) {
+        if (listIndexes[key] > maxIndex) {
+          maxIndex = listIndexes[key];
+        }
+      }
+
+      lastSwimLaneElement = allElements[maxIndex]; // получаем элемент lastSwimLaneElement
+    } else {
+      console.log("Kaiten daily helper: Kaiten board not found");
+    }
+
+    // раскрытие всех свернутых swim-lane c именами из списка спикеров
+    const allLanes = document.querySelectorAll('div[data-test="lane"]');
+    let index = 0;
+
+    // функция раскрытия каждой lane, запускаем через seTimeout чтобы не было тормозов
+    function openLanes() {
+      if (index >= allLanes.length) return; // Завершить, если все обработаны
+
+      const lane = allLanes[index];
+      const columns = lane.querySelectorAll('[data-test="column"]');
+
+      if (!columns.length) {
+        const collapseButton = lane.querySelector(
+          '[data-test="title-collapse-button"]'
+        );
+        if (collapseButton) collapseButton.click();
+      }
+
+      index++;
+      setTimeout(openLanes, 0);
+    }
+
+    openLanes();
+    nextNameButton.disabled = false;
   }
 
   // слушатель радио кнопок
@@ -171,41 +330,9 @@ async function createWindow() {
     generateList();
   });
 
-  // переключение следующего спикера
+  // переключение следующего спикера // TODO нужно переписать всю логику слушателя
   nextNameButton.addEventListener("click", () => {
-    scrollToText(firstSwimLaneElement); // понимаемся всегда сначала наверх к 1му swim-lane
-
-    // через 0.7 секунды идем вниз к доске выступающего
-    setTimeout(() => {
-      scrollToText(randomList[0]);
-
-      // костыль для корректного скролла наверх к самому первому спикеру
-      if (randomList[0] === firstSwimLaneElement) {
-        // временная функция для поднятия на самый верх в начало
-        function scrolltoTop() {
-          let currentIteration = 2;
-          while (5 > currentIteration) {
-            setTimeout(() => {
-              scrollToText(firstSwimLaneElement);
-            }, currentIteration * 200); // идем еще чуть выше для Яны каждые 0.2 секунды // TODO переписать
-            currentIteration = currentIteration + 1;
-          }
-        }
-        scrolltoTop(); // поднимаем вверх еще 4 раза, докручиваем до 1й верхней таблички
-      }
-
-      if (randomList.length > 0) {
-        if (randomList.length === 1) {
-          randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
-          nextNameButton.disabled = true;
-        }
-
-        nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
-        randomList.shift(); // удаляем первый элемент
-      } else if (randomList.length < 1) {
-        // randomList[0] = "Сначала сгенерируйте новый список"; // TODO добавить текст после окончания
-      }
-    }, 700);
+    scrollToText(randomList[0]);
 
     animateLeaf(); // включаем падающий лист
   });
@@ -214,16 +341,23 @@ async function createWindow() {
   document
     .getElementById("button-generate-own-list")
     .addEventListener("click", () => {
-      if (!inputNames.value) return;
+      if (!inputNames.value) return; // TODO убрать всю логику в saveListToStorage()
 
-      const namesArray = inputNames.value.replace(/\n/g, '').split(",");
-      saveListToStorage(namesArray);
+      const namesArray = inputNames.value
+        .replace(/\n/g, "")
+        .split(",")
+        .map((e) => e.trim());
+      const sortedListNames = saveListToStorage(namesArray);
 
-      // скрываем форму добавления нового списка и показываем снова кнопку добавления
+      if (sortedListNames) {
+              // скрываем форму добавления нового списка и показываем снова кнопку добавления
       formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
       buttonFormCreateList.style.display = "block";
-      const list = document.getElementById("list");
-      list.innerHTML = generateHTMLList(namesArray);
+      list.innerHTML = generateHTMLList(sortedListNames);
+      } else {
+        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Исправьте список и сохраните еще раз.`
+      }
+
     });
 
   // кнопка отмены создания нового списка
@@ -241,8 +375,7 @@ async function createWindow() {
       const newDisplay =
         formCreateList.style.display === "none" ? "block" : "none";
       formCreateList.style.display = newDisplay;
-      // скрываем саму кнопку
-      buttonFormCreateList.style.display = "none";
+      buttonFormCreateList.style.display = "none"; // скрываем саму кнопку
     });
 
   // анимация бабл-кнопки
@@ -254,9 +387,67 @@ async function createWindow() {
 
 // сохранение своего списка в хранлище Хрома
 function saveListToStorage(newList) {
-  chrome.storage.sync.set({ ownList: newList }, () => {
-    console.log("Новый список сохранен");
-  });
+  // находиим все swim-lane
+  const laneTitleElements = document.querySelectorAll(
+    'div[role="button"][data-test="lane-title-text"]'
+  );
+
+  // сортируем согласно располжению swim-lane в Кайтене
+  if (laneTitleElements.length) {
+    // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
+    firstSwimLaneElement = Array.from(laneTitleElements)[0].textContent.trim(); // получаем самый первый swim-lane элемент name
+    hasAllNamesOnBoard = true;
+    listIndexes = {}; // очищаем listIndexes
+
+    // а теперь получаем самый нижний элемент чтобы опускаться в самый низ при рандомного скролле
+    for (const name of newList) {
+      const matchingElements = Array.from(laneTitleElements).filter(
+        (element) => {
+          return element.textContent.trim() === name;
+        }
+      );
+
+      allElements = Array.from(laneTitleElements);
+      const targetIndex = Array.from(laneTitleElements).findIndex(
+        (e) => e === matchingElements[0]
+      );
+
+      const prevElem =
+        targetIndex > 0 ? allElements[targetIndex - 1] : matchingElements[0];
+
+      listIndexes[name] = targetIndex;
+      if (targetIndex === -1) hasAllNamesOnBoard = false; // будем возвращать false, если хотя бы одно имя на доске не найдено
+    }
+
+    // находим максимальный индекс swim-lane
+    for (const key in listIndexes) {
+      if (listIndexes[key] > maxIndex) {
+        maxIndex = listIndexes[key];
+      }
+    }
+
+    lastSwimLaneElement = allElements[maxIndex]; // получаем элемент lastSwimLaneElement
+
+    console.log("listIndexes ---->", listIndexes);
+    // сортируем новый список
+    const sortedListArray = Object.entries(listIndexes).sort(
+      (a, b) => a[1] - b[1]
+    );
+    const sortedListNamesIndex = Object.fromEntries(sortedListArray);
+    const sortedListNames = Object.keys(sortedListNamesIndex);
+
+    if (hasAllNamesOnBoard) {
+      // сохраняем в хранилище хрома
+      chrome.storage.sync.set({ ownList: sortedListNames }, () => {
+        console.log("Kaiten daily helper: new list saved: ", newList);
+      });
+      return sortedListNames;
+    } else {
+      return false;
+    }
+  } else {
+    console.log("Kaiten board not found");
+  }
 }
 
 function toggleWindow() {
