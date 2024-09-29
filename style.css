@@ -32,8 +32,12 @@
 }
 .bottom-button-container {
   display: flex;
+  flex-direction: column;
   gap: 5px;
   margin-top: 10px;
+}
+.bottom-button-container button {
+  width: fit-content;
 }
 
 .button-form-create-list{
@@ -77,6 +81,15 @@
 }
 .button-form-create-list:hover .button-create-list-describe {
     display: block;
+}
+
+/* Стили для чекбоксов */
+
+
+/* Стили для радио-кнопок */
+#radioContainer input[type="radio"]:checked,
+#checkboxContainer input[type="checkbox"]:checked {
+  accent-color: green; /* Меняет цвет радио-кнопки на зеленый */
 }
 
 /* x5 svg */
@@ -241,7 +254,7 @@
     width: 120px;
     background-color: #808080;
     color: #fff;
-    font-size: 10px;
+    font-size: 12px;
     text-align: center;
     padding: 5px;
     border-radius: 5px;
@@ -273,4 +286,9 @@
     visibility: visible;
     opacity: 0.8;
   }
+  /* Скрываем подсказку при наведении курсора на подсказку */
+  .tooltip-container .tooltip:hover {
+    visibility: hidden;
+  }
+  
 /* подсказка */
