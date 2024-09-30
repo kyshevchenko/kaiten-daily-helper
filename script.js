@@ -1,5 +1,6 @@
 let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
+let startListLength; // Опеределение длины списка для прогресс-бара
 let consistentList = []; // последовательный список // TODO для будущего разделения списков
 let isRandomMode;
 let firstSwimLaneElement; // самый первый swim-lane на доске
@@ -72,30 +73,36 @@ async function createWindow() {
 
         <br/>
         <div id="radioContainer">
-        <input class="radio-extension" checked type="radio" value="true" id="consistent-mode" name="mode"/>
-        <label class="radio-label-extension"for="consistent-mode">Последовательный порядок</label>
-        <br/>
-        <input class="radio-extension" type="radio" value="false" id="random-mode" name="mode"/>
-        <label for="random-mode">Перемешать</label>
+          <input class="radio-extension" checked type="radio" value="true" id="consistent-mode" name="mode"/>
+          <label class="radio-label-extension"for="consistent-mode">Последовательный порядок</label>
+          <br/>
+          <input class="radio-extension" type="radio" value="false" id="random-mode" name="mode"/>
+          <label for="random-mode">Перемешать</label>
         </div>
 
 
         <div class="button-form-create-list tooltip-container" id="button-form-create-list">
-        <button class="button-create-list" >${plusSvg}</button>
-        <p class="button-create-list-describe tooltip">Создать свой список</p>
+          <button class="button-create-list" >${plusSvg}</button>
+          <p class="button-create-list-describe tooltip">Создать свой список</p>
         </div>
 
         <div class="form-create-list" id="form-create-list">
-        <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
-        <br/>
-        <br/>
-        <button class="bubbly-button" id="button-generate-own-list">Сохранить</button>
-        <button class="bubbly-button" id="button-cancel-own-list">Отмена</button>
+          <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
+          <br/>
+          <br/>
+          <button class="bubbly-button" id="button-generate-own-list">Сохранить</button>
+          <button class="bubbly-button" id="button-cancel-own-list">Отмена</button>
         </div>
 
-        <div class="bottom-button-container">
-        <button class="bubbly-button" id="start-button">Начать заново${updateSvg}</button>
-        <button class="bubbly-button" id="next-name">Кто следующий?</button>
+        <div class="bottom-block">
+          <div class="bottom-buttons">
+            <button class="bubbly-button" id="start-button">Начать заново${updateSvg}</button>
+            <button class="bubbly-button" id="next-name">Кто следующий?</button>
+         </div>
+         <div class="progress-bar">
+            ${progressBarSvg}
+            <p class="progress-text"></p>
+         </div>
         </div>
 
       </div>
@@ -104,6 +111,7 @@ async function createWindow() {
       ${fallenLeafSvg}
       ${x5Svg}
     `;
+
   document.body.appendChild(container);
   const list = document.getElementById("list");
   const inputNames = document.getElementById("input-names");
@@ -115,6 +123,27 @@ async function createWindow() {
   const buttonFormCreateList = document.getElementById(
     "button-form-create-list"
   );
+
+  // переменные прогресс-бара
+  const circle = document.querySelector(".progress-bar-circle");
+  const progressValue = document.querySelector(".progress-text");
+  const radius = circle.r.baseVal.value;
+  const circleLength = radius * 2 * Math.PI;
+
+// функция установки значения прогресс-бара
+  function setProgress() {
+    const currentProgress = startListLength - randomList.length + 1;
+    const progressPercentage = (currentProgress / startListLength) * 100;
+    const circleFillValue =
+      circleLength - (progressPercentage / 100) * circleLength;
+    circle.style.strokeDashoffset = circleFillValue;
+    progressValue.textContent = `${currentProgress}/${startListLength}`;
+  }
+// функция очистки прогресс-бара
+  function clearProgress() {
+    progressValue.textContent = `0/${startListLength}`;
+    circle.style.strokeDashoffset = circleLength;
+  }
 
   // Функция для очистки всех тайм-аутов
   function clearAllTimeout(timersArray) {
@@ -154,6 +183,11 @@ async function createWindow() {
       const targetIndex = Array.from(laneTitleElements).findIndex(
         (e) => e === matchingElements[0]
       );
+
+      // дизейбл кнопки след спикера во время скролла к Яне
+      if (targetIndex === 0) {
+        nextNameButton.disabled = true;
+      }
 
       // Определяем предыдущий swim-lane чтобы осуществлять прокрутку до него при isRandomMode
       let targetElem =
@@ -204,6 +238,10 @@ async function createWindow() {
             }
           }, 500);
         }
+        setTimeout(() => {
+          // отмена блокировки кнопки след спикера во время скроллинга к Яне
+          if (randomList.length > 0) nextNameButton.disabled = false;
+        }, 2100);
       }
     } else {
       name && console.log(`Kaiten daily helper: Speaker ${name} not found`);
@@ -229,6 +267,8 @@ async function createWindow() {
       checkbox.checked &&
         randomList.push(checkbox.nextElementSibling.textContent);
     });
+    startListLength = randomList.length;
+    clearProgress();
     isRandomMode && shuffleArray(randomList); // перемешиваем список, если isRandomMode
 
     nextSpeakerField.textContent = "Список обновлен";
@@ -323,6 +363,7 @@ async function createWindow() {
 
   // переключение следующего спикера // TODO нужно переписать всю логику слушателя
   nextNameButton.addEventListener("click", () => {
+    setProgress();
     scrollToText(randomList[0]);
 
     // Обновление списка спикеров

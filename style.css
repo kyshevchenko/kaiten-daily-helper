@@ -31,21 +31,47 @@
 }
 
 #speaker {
-    height: 5px;
+  height: 5px;
+  margin-top: 0;
 }
 
 #start-button, #next-name {
     display: flex;
     align-items: center;
 }
-.bottom-button-container {
+.bottom-block {
+  display: flex;
+}
+.bottom-buttons {
   display: flex;
   flex-direction: column;
   gap: 5px;
   margin-top: 10px;
 }
-.bottom-button-container button {
+.bottom-buttons button {
   width: fit-content;
+  margin-top: 10px;
+}
+
+.progress-bar-circle {
+  stroke-dasharray: 251;
+  stroke-dashoffset: 251;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 2s;
+}
+.progress-bar {
+  position: relative;
+}
+.progress-bar p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.progress-text {
+  color: black;
 }
 
 .button-form-create-list{
@@ -97,7 +123,7 @@
 /* Стили для радио-кнопок */
 #radioContainer input[type="radio"]:checked,
 #checkboxContainer input[type="checkbox"]:checked {
-  accent-color: green; /* Меняет цвет радио-кнопки на зеленый */
+  accent-color: green;
 }
 
 /* x5 svg */
