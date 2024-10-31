@@ -1,6 +1,6 @@
 let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
-let startListLength; // Опеределение длины списка для прогресс-бара
+let startListLength; // Определение длины списка для прогресс-бара
 let consistentList = []; // последовательный список // TODO для будущего разделения списков
 let isRandomMode;
 let firstSwimLaneElement; // самый первый swim-lane на доске
@@ -8,10 +8,8 @@ let currentSwimLane;
 let lastSwimLaneElement; // самый последний из списка пользователя
 let maxIndex = 0;
 let listIndexes = {}; // хранилище { имя: lane-title-index }
-let timer1; // для отсроченного поднятие на вершину первого элемента
+let timer1; // для корректной прокрутки к элементу с позиционированием вверху экрана
 let timer2;
-let timer3;
-let timer4;
 let allElements; // вообще все laneTitleElements на сайте
 let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
 
@@ -130,7 +128,7 @@ async function createWindow() {
   const radius = circle.r.baseVal.value;
   const circleLength = radius * 2 * Math.PI;
 
-// функция установки значения прогресс-бара
+  // функция установки значения прогресс-бара
   function setProgress() {
     const currentProgress = startListLength - randomList.length + 1;
     const progressPercentage = (currentProgress / startListLength) * 100;
@@ -139,7 +137,7 @@ async function createWindow() {
     circle.style.strokeDashoffset = circleFillValue;
     progressValue.textContent = `${currentProgress}/${startListLength}`;
   }
-// функция очистки прогресс-бара
+  // функция очистки прогресс-бара
   function clearProgress() {
     progressValue.textContent = `0/${startListLength}`;
     circle.style.strokeDashoffset = circleLength;
@@ -156,9 +154,10 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearAllTimeout([timer1, timer2, timer3, timer4]); // убираем все таймауты скролла предыдущего клика //
+    // isRandomMode = false; // TODO добавлено временно для изменения скролла при раннем решении (скролл сначала в самый низ, а потом к swim-lane)
+    clearAllTimeout([timer1, timer2]); // убираем все таймауты скролла предыдущего клика //
 
-    // опускаемся сначала к самому низкому элементу при isRandomMode
+    // опускаемся сначала к самому низкому элементу при isRandomMode // TODO как будто больше не нужно, удалить
     if (isRandomMode && lastSwimLaneElement) {
       lastSwimLaneElement.scrollIntoView({
         behavior: "smooth",
@@ -195,20 +194,21 @@ async function createWindow() {
           ? allElements[targetIndex - 1]
           : matchingElements[0];
 
-      timer2 = setTimeout(() => {
-        scrolltoTop(); // вызываем доп поднятие, если это самый первый swim-lane. А так же, если этой 2й swim-lane и 1й свернут
-
+      // доп функция для скролла к элементу, а затем к предыдущему элементы для корректного отображения на экране
+      timer1 = setTimeout(() => {
         if (isRandomMode) {
           targetElem.scrollIntoView({
             behavior: "smooth",
             block: "start",
           });
         } else {
+          // прокручиваем до элемента к позиции start
           matchingElements[0].scrollIntoView({
             behavior: "smooth",
             block: "start",
           });
-          timer3 = setTimeout(() => {
+          // а затем к предыдущему элементу к позиции start
+          timer2 = setTimeout(() => {
             allElements[targetIndex - 1] &&
               allElements[targetIndex - 1].scrollIntoView({
                 behavior: "smooth",
@@ -218,33 +218,23 @@ async function createWindow() {
         }
       }, 700);
 
-      // доп функция для поднятия к первому элементу, если это самый 1й swim-lane или 2й
-      function scrolltoTop() {
-        if (targetIndex === 0) {
-          matchingElements[0].scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-          timer1 = setTimeout(() => {
-            let currentIteration = 2;
-            while (10 > currentIteration) {
-              timer4 = setTimeout(() => {
-                matchingElements[0].scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-              }, currentIteration * 300); // идем еще чуть выше для Яны каждые 0.15 секунды // TODO переписать
-              currentIteration = currentIteration + 1;
-            }
-          }, 500);
-        }
+      const boardContainer = matchingElements[0].closest(
+        '[data-test="board-container"]'
+      );
+      const allContainerLines = boardContainer.querySelectorAll(
+        '[data-test="lane-title-text"]'
+      );
+      // доп прокрутка на самый верх поддоски, если это первый элемент на доске
+      if (allContainerLines[0].textContent.trim() === name) {
         setTimeout(() => {
-          // отмена блокировки кнопки след спикера во время скроллинга к Яне
-          if (randomList.length > 0) nextNameButton.disabled = false;
-        }, 2100);
+          boardContainer.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 1500);
       }
     } else {
-      name && console.log(`Kaiten daily helper: Speaker ${name} not found`);
+      name && console.log(`Kaiten daily helper: Speaker ${name} not found on board`);
     }
   }
 
@@ -352,11 +342,12 @@ async function createWindow() {
   const labels = Array.from(document.getElementsByClassName("checkbox-label"));
   labels.forEach((e) =>
     e.addEventListener("click", () => {
+      isRandomMode = false;
       scrollToText(e.textContent);
     })
   );
 
-  // слушатель кнопка start
+  // слушатель кнопки start
   document.getElementById("start-button").addEventListener("click", () => {
     generateList();
   });
@@ -370,14 +361,12 @@ async function createWindow() {
     if (randomList.length > 0) {
       nextSpeakerField.style.color = "black";
       if (randomList.length === 1) {
-        randomList[0] = `${randomList[0]} (это последний спикер)`; // подсветить последнего спикера
+        randomList[0] = `${randomList[0]} (это заключительный спикер)`; // подсветить последнего спикера
         nextNameButton.disabled = true;
       }
 
       nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
       randomList.shift(); // удаляем первый элемент
-    } else if (randomList.length < 1) {
-      // TODO добавить текст/функционал после окончания
     }
 
     animateLeaf(); // включаем падающий лист
@@ -400,6 +389,17 @@ async function createWindow() {
         formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
         buttonFormCreateList.style.display = "block";
         list.innerHTML = generateHTMLList(sortedListNames);
+
+        // слушатель label имен в новом списке //TODO убрать дублирование (вынести в функции все слушатели)
+        const labels = Array.from(
+          document.getElementsByClassName("checkbox-label")
+        );
+        labels.forEach((e) =>
+          e.addEventListener("click", () => {
+            isRandomMode = false;
+            scrollToText(e.textContent);
+          })
+        );
       } else {
         inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Исправьте список и сохраните еще раз.`;
       }
@@ -473,7 +473,6 @@ function saveListToStorage(newList) {
 
     lastSwimLaneElement = allElements[maxIndex]; // получаем элемент lastSwimLaneElement
 
-    console.log("listIndexes ---->", listIndexes);
     // сортируем новый список
     const sortedListArray = Object.entries(listIndexes).sort(
       (a, b) => a[1] - b[1]
@@ -484,14 +483,14 @@ function saveListToStorage(newList) {
     if (hasAllNamesOnBoard) {
       // сохраняем в хранилище хрома
       chrome.storage.sync.set({ ownList: sortedListNames }, () => {
-        console.log("Kaiten daily helper: new list saved: ", newList);
+        console.log("Kaiten daily helper: new list saved! ", newList);
       });
       return sortedListNames;
     } else {
       return false;
     }
   } else {
-    console.log("Kaiten board not found");
+    console.log("Kaiten daily helper: Kaiten board not found");
   }
 }
 
