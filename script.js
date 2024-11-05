@@ -183,11 +183,6 @@ async function createWindow() {
         (e) => e === matchingElements[0]
       );
 
-      // дизейбл кнопки след спикера во время скролла к Яне
-      if (targetIndex === 0) {
-        nextNameButton.disabled = true;
-      }
-
       // Определяем предыдущий swim-lane чтобы осуществлять прокрутку до него при isRandomMode
       let targetElem =
         targetIndex > 0 && isRandomMode
