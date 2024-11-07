@@ -145,10 +145,8 @@ async function createWindow() {
 
   // Функция для очистки всех тайм-аутов
   function clearAllTimeout(timersArray) {
-    let count = 1;
-    while (count < timersArray.length) {
-      timersArray[count] && clearTimeout(timersArray[count]);
-      count += 1;
+    for (const t of timersArray) {
+      clearTimeout(t);
     }
   }
 
@@ -183,13 +181,32 @@ async function createWindow() {
         (e) => e === matchingElements[0]
       );
 
-      // Определяем предыдущий swim-lane чтобы осуществлять прокрутку до него при isRandomMode
+      /* скролл к самому первому элементу на доске */
+      // находим все доски на странице и элементы с именами на ней
+      const boardContainer = matchingElements[0].closest(
+        '[data-test="board-container"]'
+      );
+      const allContainerLines = boardContainer.querySelectorAll(
+        '[data-test="lane-title-text"]'
+      );
+      // доп прокрутка на самый верх доски, если это первый элемент на ней
+      if (allContainerLines[0].textContent.trim() === name) {
+        boardContainer.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        return;
+      }
+      /* скролл к самому первому элементу на доске */
+
+      /* Если это не первый элемент на доске, выполняем другую логику скролла */
+      // Определяем предыдущий (swim-lane) элемент, чтобы осуществлять прокрутку до него при isRandomMode
       let targetElem =
         targetIndex > 0 && isRandomMode
           ? allElements[targetIndex - 1]
           : matchingElements[0];
 
-      // доп функция для скролла к элементу, а затем к предыдущему элементы для корректного отображения на экране
+      // сначала скроллим к предыдущему элементу при isRandomMode
       timer1 = setTimeout(() => {
         if (isRandomMode) {
           targetElem.scrollIntoView({
@@ -197,12 +214,12 @@ async function createWindow() {
             block: "start",
           });
         } else {
-          // прокручиваем до элемента к позиции start
+          // иначе прокручиваем до элемента к позиции start
           matchingElements[0].scrollIntoView({
             behavior: "smooth",
             block: "start",
           });
-          // а затем к предыдущему элементу к позиции start
+          // а затем прокручиваем к предыдущему элементу к позиции start
           timer2 = setTimeout(() => {
             allElements[targetIndex - 1] &&
               allElements[targetIndex - 1].scrollIntoView({
@@ -212,24 +229,9 @@ async function createWindow() {
           }, 700);
         }
       }, 700);
-
-      const boardContainer = matchingElements[0].closest(
-        '[data-test="board-container"]'
-      );
-      const allContainerLines = boardContainer.querySelectorAll(
-        '[data-test="lane-title-text"]'
-      );
-      // доп прокрутка на самый верх поддоски, если это первый элемент на доске
-      if (allContainerLines[0].textContent.trim() === name) {
-        setTimeout(() => {
-          boardContainer.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 1500);
-      }
     } else {
-      name && console.log(`Kaiten daily helper: Speaker ${name} not found on board`);
+      name &&
+        console.log(`Kaiten daily helper: Speaker ${name} not found on board`);
     }
   }
 
