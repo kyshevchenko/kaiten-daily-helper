@@ -500,20 +500,20 @@ async function createWindow() {
 
     //Функция для наполнения таблицы
     const getTableContent = (info) => {
-      let content = '';
+      let content = "";
 
       for (const i in info) {
         content += `
-        <tr class="custom-table-row" #${info[i].ID}>
+        <tr class="custom-table-row" data-id="${info[i].ID}">
           <td>${info[i].name}</td>
           <td>${info[i].ID}</td>
           <td>${info[i].status}</td>
           <td class="img-cell"><img src=${info[i].avatar}/> ${info[i].responsible}</td>
         </tr>
-        ` 
+        `;
       }
       return content;
-    }
+    };
 
     // Создаем и наполняем таблицу
     const customTable = `
@@ -536,7 +536,14 @@ async function createWindow() {
     tableDialog.innerHTML = customTable;
     document.body.appendChild(tableDialog); // Начинаем отображать окно
 
-    //TODO добавить слушатель событий для ссылок на таски
+    // Cлушатель событий для каждой строки таблицы
+    const tableRows = document.querySelectorAll(".custom-table-row");
+    tableRows.forEach((e) => e.addEventListener("click", (event) => {
+      const taskId = event.currentTarget.getAttribute("data-id");
+      // window.location.href = `https://kaiten.x5.ru/space/3260/card/${taskId}`
+      const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
+      window.open(link, "_blank"); // Открыть ссылку в новой вкладке
+    }));
   });
 
   // Анимация бабл-кнопки
