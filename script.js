@@ -483,8 +483,10 @@ async function createWindow() {
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
+      if (!tasksInfo[0].textContent) tasksInfo.splice(0, 6); // если ID нет, то это пустая строка, удаляем ее // TODO переписать логику
+
       const avatarData = tasksInfo[2].querySelector("img");
-      const avatar = avatarData ? avatarData.src : "";
+      const avatar = avatarData ? `<img src=${avatarData.src}/>` : "";
 
       info[count] = {
         name: taskNames[count - 1].textContent,
@@ -508,7 +510,7 @@ async function createWindow() {
           <td>${info[i].name}</td>
           <td>${info[i].ID}</td>
           <td>${info[i].status}</td>
-          <td class="img-cell"><img src=${info[i].avatar}/> ${info[i].responsible}</td>
+          <td class="img-cell">${info[i].avatar} ${info[i].responsible}</td>
         </tr>
         `;
       }
@@ -538,12 +540,14 @@ async function createWindow() {
 
     // Cлушатель событий для каждой строки таблицы
     const tableRows = document.querySelectorAll(".custom-table-row");
-    tableRows.forEach((e) => e.addEventListener("click", (event) => {
-      const taskId = event.currentTarget.getAttribute("data-id");
-      // window.location.href = `https://kaiten.x5.ru/space/3260/card/${taskId}`
-      const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
-      window.open(link, "_blank"); // Открыть ссылку в новой вкладке
-    }));
+    tableRows.forEach((e) =>
+      e.addEventListener("click", (event) => {
+        const taskId = event.currentTarget.getAttribute("data-id");
+        // window.location.href = `https://kaiten.x5.ru/space/3260/card/${taskId}`
+        const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
+        window.open(link, "_blank"); // Открыть ссылку в новой вкладке
+      })
+    );
   });
 
   // Анимация бабл-кнопки
