@@ -1,26 +1,26 @@
 .extension-container{
-    position: fixed;
-    display: block;
-    top: 0;
-    right: 0;
-    width: 300px;
-    min-height: 200px;
-    height: auto;
-    background-color: white;
-    border: 1px solid #ddd;
-    z-index: 9999;
-    overflow: auto;
-    border-radius: 0 0 0 15px;
-    padding-left: 20px;
-    overflow: hidden;
+  position: fixed;
+  display: block;
+  top: 0;
+  right: 0;
+  width: 300px;
+  min-height: 200px;
+  height: auto;
+  background-color: white;
+  border: 1px solid #ddd;
+  z-index: 9999;
+  overflow: auto;
+  border-radius: 0 0 0 15px;
+  padding-left: 20px;
+  overflow: hidden;
 }
 
 .checkbox-label, #radioContainer, #speaker {
-    background-color: white;
-    border-radius: 3px;
-    color: black;
-    font-family: Arial, sans-serif;
-    padding-left: 5px;
+  background-color: white;
+  border-radius: 3px;
+  color: black;
+  font-family: Arial, sans-serif;
+  padding-left: 5px;
 }
 .checkbox-label {
   cursor: pointer;
@@ -36,8 +36,8 @@
 }
 
 #start-button, #next-name {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 .bottom-block {
   display: flex;
@@ -74,51 +74,45 @@
   color: black;
 }
 
-.button-form-create-list{
-    position: absolute;
-    width: 41px;
-    height: 31px;
-    top: 20px;
-    right: -1px;
-    text-align: right;
+.side-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: absolute;
+  height: 70px;
+  top: 10px;
+  right: 1px;
 }
-
-.form-create-list{
-    display: none;
-    position: absolute;
-    top: 10px;
-    right: 10px;
+.form-create-list {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 1px;
 }
 
 .input-names {
-    width: 150px;
-    height: 70px;
-    resize: none;
+  width: 150px;
+  height: 70px;
+  resize: none;
 }
 .input-names::placeholder {
-    font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif;
   }
 
 .list {
-    min-height: 120px;
-    width: 90%;
-    padding-top: 5px;
+  min-height: 120px;
+  width: 90%;
+  padding-top: 5px;
 }
 
 .plus-svg {
-    height: 25px;
-    width: 25px;
+  height: 25px;
+  width: 25px;
 }
-
-.button-create-list{
-    height: 31px;
+.release-svg {
+  /* height: 25px;
+  width: 25px; */
 }
-.button-form-create-list:hover .button-create-list-describe {
-    display: block;
-}
-
-/* Стили для чекбоксов */
-
 
 /* Стили для радио-кнопок */
 #radioContainer input[type="radio"]:checked,
@@ -128,33 +122,32 @@
 
 /* x5 svg */
 .x5-svg {
-    height: 150px;
-    width: 150px;
-    position: absolute;
-    bottom: -35px;
-    right: -20px;
-    opacity: 0.06;
-    transform: rotate(10deg);
+  height: 150px;
+  width: 150px;
+  position: absolute;
+  bottom: -35px;
+  right: -20px;
+  opacity: 0.06;
+  transform: rotate(10deg);
 }
 
 /* update svg */
 .update-svg {
-    height: 16px;
-    width: 16px;
-    color: white;
-    padding-left: 5px;
+  height: 16px;
+  width: 16px;
+  color: white;
+  padding-left: 5px;
 }
 
 /* падающий лист */
 .leaf {
-    position: absolute;
-    top: -150px;
-    z-index: 999;
+  position: absolute;
+  top: -150px;
+  z-index: 999;
 }
 .leaf svg {
-    width: 100px;
-    height: auto;
-
+  width: 100px;
+  height: auto;
 }
 /* падающий лист */
 
@@ -283,25 +276,25 @@
   }
 
   /* Скрытая подсказка */
-  .tooltip-container .tooltip {
-    visibility: hidden;
-    width: 120px;
-    background-color: #808080;
-    color: #fff;
-    font-size: 12px;
-    text-align: center;
-    padding: 5px;
-    border-radius: 5px;
+.tooltip-container .tooltip {
+  visibility: hidden;
+  width: 120px;
+  background-color: #808080;
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
 
-    /* Позиционирование вручную относительно .tooltip-container */
-    position: absolute;
-    z-index: 1;
-    right: 100%;
-    top: 10%;
-    transform: translateX(-10px);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
+  /* Позиционирование вручную относительно .tooltip-container */
+  position: absolute;
+  z-index: 1;
+  right: 100%;
+  top: 10%;
+  transform: translateX(-10px);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
 
   /* Треугольник для подсказки */
   .tooltip-container .tooltip::after {
@@ -314,7 +307,6 @@
     border-style: solid;
     border-color: transparent transparent transparent #808080;
   }
-
   /* Показать подсказку при наведении */
   .tooltip-container:hover .tooltip {
     visibility: visible;
@@ -323,6 +315,66 @@
   /* Скрываем подсказку при наведении курсора на подсказку */
   .tooltip-container .tooltip:hover {
     visibility: hidden;
-  }
-  
-/* подсказка */
+  }  
+
+  /* Окно для релиз-таблицы */
+.table-dialog {
+  position: absolute;
+  background-color: black;
+  border-radius: 10px;
+  max-height: 800px;
+  width: 800px;
+  overflow: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5000;
+}
+
+/* Стили для релиз-таблицы */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  background-color: #333;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-table thead {
+  background-color: #000000;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.custom-table th, .custom-table td {
+  padding: 1px 8px;
+  border: 1px solid #666;
+  text-align: left;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: #444;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #555;
+  cursor: pointer;
+}
+
+/* Стили для ячеек с изображениями */
+.custom-table .img-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.custom-table .img-cell img {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 0.5px;
+  border-radius: 50%;
+  border: 1px solid #666;
+}
+/* Стили для релиз-таблицы */

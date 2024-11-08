@@ -78,11 +78,18 @@ async function createWindow() {
           <label for="random-mode">Перемешать</label>
         </div>
 
+        <div class="side-menu">
+           <div class="tooltip-container">
+             <button id="button-form-create-list">${plusSvg}</button>
+             <p class="tooltip">Создать свой список</p>
+          </div>
 
-        <div class="button-form-create-list tooltip-container" id="button-form-create-list">
-          <button class="button-create-list" >${plusSvg}</button>
-          <p class="button-create-list-describe tooltip">Создать свой список</p>
+          <div class=" tooltip-container">
+             <button id="button-display-release-table">${releaseSvg}</button>
+             <p class="tooltip">Показать/скрыть таблицу релиза</p>
+          </div>
         </div>
+
 
         <div class="form-create-list" id="form-create-list">
           <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
@@ -116,19 +123,22 @@ async function createWindow() {
   const nextSpeakerField = document.getElementById("speaker");
   const nextNameButton = document.getElementById("next-name");
   nextNameButton.disabled = true;
-  const formCreateList = document.getElementById("form-create-list");
+  const formCreateList = document.getElementById("form-create-list"); // Форма для создания нового списка
   formCreateList.style.display = "none"; // TODO заменить на css, убрать дублирование
   const buttonFormCreateList = document.getElementById(
     "button-form-create-list"
   );
+  const buttonDisplayReleaseTable = document.getElementById(
+    "button-display-release-table"
+  );
 
-  // переменные прогресс-бара
+  // Переменные прогресс-бара
   const circle = document.querySelector(".progress-bar-circle");
   const progressValue = document.querySelector(".progress-text");
   const radius = circle.r.baseVal.value;
   const circleLength = radius * 2 * Math.PI;
 
-  // функция установки значения прогресс-бара
+  // Функция установки значения прогресс-бара
   function setProgress() {
     const currentProgress = startListLength - randomList.length + 1;
     const progressPercentage = (currentProgress / startListLength) * 100;
@@ -137,7 +147,7 @@ async function createWindow() {
     circle.style.strokeDashoffset = circleFillValue;
     progressValue.textContent = `${currentProgress}/${startListLength}`;
   }
-  // функция очистки прогресс-бара
+  // Функция очистки прогресс-бара
   function clearProgress() {
     progressValue.textContent = `0/${startListLength}`;
     circle.style.strokeDashoffset = circleLength;
@@ -152,7 +162,6 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    // isRandomMode = false; // TODO добавлено временно для изменения скролла при раннем решении (скролл сначала в самый низ, а потом к swim-lane)
     clearAllTimeout([timer1, timer2]); // убираем все таймауты скролла предыдущего клика //
 
     // опускаемся сначала к самому низкому элементу при isRandomMode // TODO как будто больше не нужно, удалить
@@ -235,7 +244,7 @@ async function createWindow() {
     }
   }
 
-  // функция для перемешивания массива по алгоритму Фишера-Йейтса
+  // Функция для перемешивания массива по алгоритму Фишера-Йейтса
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -245,7 +254,7 @@ async function createWindow() {
     return array;
   }
 
-  // функция для генерации списка (обычного и рандомного)
+  // Функция для генерации списка (обычного и рандомного)
   function generateList() {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     randomList = [];
@@ -326,7 +335,7 @@ async function createWindow() {
     nextNameButton.disabled = false;
   }
 
-  // слушатель радио кнопок
+  // Слушатель радио кнопок
   document
     .getElementById("radioContainer")
     .addEventListener("change", (event) => {
@@ -335,7 +344,7 @@ async function createWindow() {
       }
     });
 
-  // слушатель label имен
+  // Слушатель label имен
   const labels = Array.from(document.getElementsByClassName("checkbox-label"));
   labels.forEach((e) =>
     e.addEventListener("click", () => {
@@ -344,12 +353,12 @@ async function createWindow() {
     })
   );
 
-  // слушатель кнопки start
+  // Слушатель кнопки start
   document.getElementById("start-button").addEventListener("click", () => {
     generateList();
   });
 
-  // переключение следующего спикера // TODO нужно переписать всю логику слушателя
+  // Переключение следующего спикера // TODO нужно переписать всю логику слушателя
   nextNameButton.addEventListener("click", () => {
     setProgress();
     scrollToText(randomList[0]);
@@ -358,18 +367,18 @@ async function createWindow() {
     if (randomList.length > 0) {
       nextSpeakerField.style.color = "black";
       if (randomList.length === 1) {
-        randomList[0] = `${randomList[0]} (это заключительный спикер)`; // подсветить последнего спикера
+        randomList[0] = `${randomList[0]} (это заключительный спикер)`; // Подсветить последнего спикера
         nextNameButton.disabled = true;
       }
 
-      nextSpeakerField.textContent = randomList[0]; // показываем первый элемент в списке спикеров
-      randomList.shift(); // удаляем первый элемент
+      nextSpeakerField.textContent = randomList[0]; // Показываем первый элемент в списке спикеров
+      randomList.shift(); // Удаляем первый элемент
     }
 
-    animateLeaf(); // включаем падающий лист
+    animateLeaf(); // Включаем падающий лист
   });
 
-  // создание своего нового списка
+  // Создание своего нового списка
   document
     .getElementById("button-generate-own-list")
     .addEventListener("click", () => {
@@ -398,11 +407,11 @@ async function createWindow() {
           })
         );
       } else {
-        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Исправьте список и сохраните еще раз.`;
+        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Скорректируйте список и сохраните еще раз.`;
       }
     });
 
-  // кнопка отмены создания нового списка
+  // Кнопка отмены создания нового списка
   document
     .getElementById("button-cancel-own-list")
     .addEventListener("click", () => {
@@ -410,7 +419,7 @@ async function createWindow() {
       buttonFormCreateList.style.display = "block";
     });
 
-  // кнопка "+" показать/скрыть форму для создания нового списка
+  // Кнопка "+" показать/скрыть форму для создания нового списка
   document
     .getElementById("button-form-create-list")
     .addEventListener("click", () => {
@@ -420,7 +429,124 @@ async function createWindow() {
       buttonFormCreateList.style.display = "none"; // скрываем саму кнопку
     });
 
-  // анимация бабл-кнопки
+  // Слушатель кнопки для отображения релиз-таблицы
+  buttonDisplayReleaseTable.addEventListener("click", () => {
+    // Удаляем таблицу при повторном нажатии на кнопку
+    const tableElem = document.querySelector(".table-dialog");
+    if (tableElem) {
+      document.body.removeChild(tableElem);
+      return;
+    }
+
+    const listBoxButton = document.querySelector(
+      '.v4-MuiSelect-root[aria-haspopup="listbox"]'
+    );
+    if (listBoxButton) {
+      listBoxButton.focus(); // Устанавливаем фокус на кнопке
+
+      // Создаем событие для эмуляции нажатия клавиши "ArrowDown"
+      const keyDownEvent = new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        code: "ArrowDown",
+        keyCode: 40,
+        bubbles: true,
+      });
+      listBoxButton.dispatchEvent(keyDownEvent);
+    } else {
+      console.log("Kaiten daily helper: release table not found!");
+      return;
+    }
+
+    const listbox = document.querySelector('[role="listbox"]'); // Находим список для смены отображения таблиц
+    const tableValue = listbox.querySelector('[data-value="1"]'); // Находим value для вида Таблица
+    tableValue.click(); // меняем значение, чтобы переключиться на вид "Таблица"
+
+    // Копирование всех данных из таблицы
+    const tableContent = document.querySelector('[data-test="some"]');
+    // console.log("tableContent----->", tableContent);
+    const childDivs = Array.from(tableContent.children).filter(
+      (child) => child.tagName === "DIV"
+    );
+
+    // Получаем все элементы <p> внутри второго дочернего <div>
+    const pElems = childDivs[1].querySelectorAll("p");
+    // Преобразуем NodeList в массив и выводим в консоль
+    const taskNames = Array.from(pElems);
+
+    // Получаем всю инфу по таскам
+    const tasksInfo = Array.from(childDivs[2].children).filter(
+      (child) => child.tagName === "DIV"
+    );
+
+    tasksInfo.splice(0, 6);
+    const info = {}; // сюда собираем всю инф
+    let count = 1; // счетчик количества тасок
+
+    while (tasksInfo.length > 0) {
+      const avatarData = tasksInfo[2].querySelector("img");
+      const avatar = avatarData ? avatarData.src : "";
+
+      info[count] = {
+        name: taskNames[count - 1].textContent,
+        ID: tasksInfo[0].textContent,
+        status: tasksInfo[1].textContent,
+        avatar,
+        responsible: tasksInfo[2].textContent,
+        tags: tasksInfo[3].textContent,
+      };
+      tasksInfo.splice(0, 6);
+      count++;
+    }
+
+    //Функция для наполнения таблицы
+    const getTableContent = (info) => {
+      let content = "";
+
+      for (const i in info) {
+        content += `
+        <tr class="custom-table-row" data-id="${info[i].ID}">
+          <td>${info[i].name}</td>
+          <td>${info[i].ID}</td>
+          <td>${info[i].status}</td>
+          <td class="img-cell"><img src=${info[i].avatar}/> ${info[i].responsible}</td>
+        </tr>
+        `;
+      }
+      return content;
+    };
+
+    // Создаем и наполняем таблицу
+    const customTable = `
+    <table class="custom-table">
+    <thead>
+      <tr>
+        <th>Название задачи</th>
+        <th>ID</th>
+        <th>Статус</th>
+        <th>Исполнитель</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${getTableContent(info)}
+    </tbody>
+    </table>`;
+
+    const tableDialog = document.createElement("div");
+    tableDialog.className = "table-dialog";
+    tableDialog.innerHTML = customTable;
+    document.body.appendChild(tableDialog); // Начинаем отображать окно
+
+    // Cлушатель событий для каждой строки таблицы
+    const tableRows = document.querySelectorAll(".custom-table-row");
+    tableRows.forEach((e) => e.addEventListener("click", (event) => {
+      const taskId = event.currentTarget.getAttribute("data-id");
+      // window.location.href = `https://kaiten.x5.ru/space/3260/card/${taskId}`
+      const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
+      window.open(link, "_blank"); // Открыть ссылку в новой вкладке
+    }));
+  });
+
+  // Анимация бабл-кнопки
   const bubblyButtons = document.getElementsByClassName("bubbly-button");
   for (var i = 0; i < bubblyButtons.length; i++) {
     bubblyButtons[i].addEventListener("click", animateButton, false);
@@ -453,9 +579,6 @@ function saveListToStorage(newList) {
       const targetIndex = Array.from(laneTitleElements).findIndex(
         (e) => e === matchingElements[0]
       );
-
-      const prevElem =
-        targetIndex > 0 ? allElements[targetIndex - 1] : matchingElements[0];
 
       listIndexes[name] = targetIndex;
       if (targetIndex === -1) hasAllNamesOnBoard = false; // будем возвращать false, если хотя бы одно имя на доске не найдено
