@@ -9,7 +9,6 @@ let lastSwimLaneElement; // самый последний из списка по
 let maxIndex = 0;
 let listIndexes = {}; // хранилище { имя: lane-title-index }
 let timer1; // для корректной прокрутки к элементу с позиционированием вверху экрана
-let timer2;
 let allElements; // вообще все laneTitleElements на сайте
 let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
 
@@ -162,7 +161,7 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearAllTimeout([timer1, timer2]); // убираем все таймауты скролла предыдущего клика //
+    clearAllTimeout([timer1]); // убираем все таймауты скролла предыдущего клика //
 
     // опускаемся сначала к самому низкому элементу при isRandomMode // TODO как будто больше не нужно, удалить
     if (isRandomMode && lastSwimLaneElement) {
@@ -177,10 +176,10 @@ async function createWindow() {
       'div[role="button"][data-test="lane-title-text"]'
     );
 
-    // Отфильтровываем, оставляем все laneTitleElements, содержащие имена спикеров // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
-    const matchingElements = Array.from(laneTitleElements).filter((element) => {
-      return element.textContent.trim() === name;
-    });
+    // Отфильтровываем, оставляем все laneTitleElements, содержащие имена спикеров
+    const matchingElements = Array.from(laneTitleElements).filter(
+      (e) => e.textContent.trim() === name
+    );
 
     if (matchingElements.length > 0) {
       currentSwimLane = matchingElements[0];
@@ -216,28 +215,26 @@ async function createWindow() {
           : matchingElements[0];
 
       // сначала скроллим к предыдущему элементу при isRandomMode
-      timer1 = setTimeout(() => {
-        if (isRandomMode) {
-          targetElem.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        } else {
-          // иначе прокручиваем до элемента к позиции start
-          matchingElements[0].scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          // а затем прокручиваем к предыдущему элементу к позиции start
-          timer2 = setTimeout(() => {
-            allElements[targetIndex - 1] &&
-              allElements[targetIndex - 1].scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-          }, 700);
-        }
-      }, 700);
+      if (isRandomMode) {
+        targetElem.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      } else {
+        // иначе прокручиваем до элемента к позиции start
+        matchingElements[0].scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        // а затем прокручиваем к предыдущему элементу к позиции start
+        timer1 = setTimeout(() => {
+          allElements[targetIndex - 1] &&
+            allElements[targetIndex - 1].scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+        }, 700);
+      }
     } else {
       name &&
         console.log(`Kaiten daily helper: Speaker ${name} not found on board`);
