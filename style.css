@@ -9,7 +9,6 @@
   background-color: white;
   border: 1px solid #ddd;
   z-index: 9999;
-  overflow: auto;
   border-radius: 0 0 0 15px;
   padding-left: 20px;
   overflow: hidden;
@@ -108,10 +107,6 @@
 .plus-svg {
   height: 25px;
   width: 25px;
-}
-.release-svg {
-  /* height: 25px;
-  width: 25px; */
 }
 
 /* Стили для радио-кнопок */
@@ -349,8 +344,13 @@
 
 .custom-table th, .custom-table td {
   padding: 1px 8px;
-  border: 1px solid #666;
+  border-right: 1px solid #666;
   text-align: left;
+}
+
+.custom-table-row {
+  border-bottom:  1px solid #666;
+  border-left:  1px solid #666;
 }
 
 .custom-table tbody tr:nth-child(even) {
