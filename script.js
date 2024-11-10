@@ -426,14 +426,39 @@ async function createWindow() {
       buttonFormCreateList.style.display = "none"; // скрываем саму кнопку
     });
 
+  /* Вспомогательные функции для слушателей и удаления слушателей */ // TODO вынести все функции по релиз-таблице
+  // Функция для обработки кликов по строкам таблицы
+  const handleRowClick = (event) => {
+    const taskId = event.currentTarget.getAttribute("data-id");
+    const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
+    window.open(link, "_blank"); // Открыть ссылку в новой вкладке
+  };
+
+  // Функция для удаления релиз-таблицы
+  const closeReleaseTable = () => {
+    const tableElem = document.querySelector(".table-dialog");
+
+    if (tableElem) {
+      // Удаляем все слушатели событий для строк таблицы
+      const tableRows = tableElem.querySelectorAll(".custom-table-row");
+      tableRows.forEach((row) => {
+        row.removeEventListener("click", handleRowClick); // Удаляем слушатель
+      });
+
+      // Удалем слушатель иконки закрытия окна
+      const tableCloseIcon = document.querySelector(".table-close-icon");
+      tableCloseIcon.removeEventListener("click", closeReleaseTable);
+
+      document.body.removeChild(tableElem); // Удаляем само окно-таблицу
+      return true;
+    }
+  };
+
   // Слушатель кнопки для отображения релиз-таблицы
   buttonDisplayReleaseTable.addEventListener("click", () => {
-    // Удаляем таблицу при повторном нажатии на кнопку
-    const tableElem = document.querySelector(".table-dialog");
-    if (tableElem) {
-      document.body.removeChild(tableElem);
-      return;
-    }
+    // закрываем окно с таблицей, если оно отображается
+    const isTableOpen = closeReleaseTable();
+    if (isTableOpen) return;
 
     const listBoxButton = document.querySelector(
       '.v4-MuiSelect-root[aria-haspopup="listbox"]'
@@ -460,12 +485,11 @@ async function createWindow() {
 
     // Копирование всех данных из таблицы
     const tableContent = document.querySelector('[data-test="some"]');
-    // console.log("tableContent----->", tableContent);
     const childDivs = Array.from(tableContent.children).filter(
       (child) => child.tagName === "DIV"
     );
 
-    // Получаем все элементы <p> внутри второго дочернего <div>
+    // Получаем все элементы <p> внутри второго дочернего <div> - это все имена тасок
     const pElems = childDivs[1].querySelectorAll("p");
     // Преобразуем NodeList в массив и выводим в консоль
     const taskNames = Array.from(pElems);
@@ -517,18 +541,19 @@ async function createWindow() {
     // Создаем и наполняем таблицу
     const customTable = `
     <table class="custom-table">
-    <thead>
+    <thead class="custom-table-head">
       <tr>
         <th>Название задачи</th>
         <th>ID</th>
         <th>Статус</th>
-        <th>Исполнитель</th>
+        <th>Исполнитель${closeIconSvg}</th>
       </tr>
     </thead>
     <tbody>
       ${getTableContent(info)}
     </tbody>
-    </table>`;
+    </table>
+    `;
 
     const tableDialog = document.createElement("div");
     tableDialog.className = "table-dialog";
@@ -537,14 +562,11 @@ async function createWindow() {
 
     // Cлушатель событий для каждой строки таблицы
     const tableRows = document.querySelectorAll(".custom-table-row");
-    tableRows.forEach((e) =>
-      e.addEventListener("click", (event) => {
-        const taskId = event.currentTarget.getAttribute("data-id");
-        // window.location.href = `https://kaiten.x5.ru/space/3260/card/${taskId}`
-        const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
-        window.open(link, "_blank"); // Открыть ссылку в новой вкладке
-      })
-    );
+    tableRows.forEach((e) => e.addEventListener("click", handleRowClick));
+
+    // Слушатель событий для иконки крестика в релиз-таблице
+    const tableCloseIcon = document.querySelector(".table-close-icon");
+    tableCloseIcon.addEventListener("click", closeReleaseTable);
   });
 
   // Анимация бабл-кнопки
