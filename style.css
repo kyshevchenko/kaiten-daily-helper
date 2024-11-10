@@ -328,6 +328,7 @@
 
 /* Стили для релиз-таблицы */
 .custom-table {
+  position: relative;
   width: 100%;
   border-collapse: collapse;
   font-family: Arial, sans-serif;
@@ -377,4 +378,29 @@
   border-radius: 50%;
   border: 1px solid #666;
 }
+
+/* Закрепление верхней строки */
+.custom-table-head {
+  position: sticky;
+  top: 0;
+}
+
+/* Стили для корректного расположения икноки крестика */
+.custom-table-head tr th:last-child {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 5px;
+  align-items: center;
+}
+
+/* Значок закрытия в правой части строки */
+.table-close-icon {
+  position: sticky;
+  top: 5px;
+  right: 0;
+  height: 16px;
+  width: 16px;
+  z-index: 5002;
+}
+
 /* Стили для релиз-таблицы */
