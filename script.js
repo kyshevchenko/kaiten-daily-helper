@@ -2,7 +2,6 @@ let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
 let startListLength; // Определение длины списка для прогресс-бара
 let consistentList = []; // последовательный список // TODO для будущего разделения списков
-let isRandomMode;
 let firstSwimLaneElement; // самый первый swim-lane на доске
 let currentSwimLane;
 let lastSwimLaneElement; // самый последний из списка пользователя
@@ -70,10 +69,10 @@ async function createWindow() {
 
         <br/>
         <div id="radioContainer">
-          <input class="radio-extension" checked type="radio" value="true" id="consistent-mode" name="mode"/>
+          <input class="radio-extension" checked type="radio" value="consistent" id="consistent-mode" name="mode"/>
           <label class="radio-label-extension"for="consistent-mode">Последовательный порядок</label>
           <br/>
-          <input class="radio-extension" type="radio" value="false" id="random-mode" name="mode"/>
+          <input class="radio-extension" type="radio" value="random" id="random-mode" name="mode"/>
           <label for="random-mode">Перемешать</label>
         </div>
 
@@ -163,14 +162,6 @@ async function createWindow() {
   function scrollToText(name) {
     clearAllTimeout([timer1]); // убираем все таймауты скролла предыдущего клика //
 
-    // опускаемся сначала к самому низкому элементу при isRandomMode // TODO как будто больше не нужно, удалить
-    if (isRandomMode && lastSwimLaneElement) {
-      lastSwimLaneElement.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-
     // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
@@ -208,33 +199,21 @@ async function createWindow() {
       /* скролл к самому первому элементу на доске */
 
       /* Если это не первый элемент на доске, выполняем другую логику скролла */
-      // Определяем предыдущий (swim-lane) элемент, чтобы осуществлять прокрутку до него при isRandomMode
-      let targetElem =
-        targetIndex > 0 && isRandomMode
-          ? allElements[targetIndex - 1]
-          : matchingElements[0];
+      const prevElem = allElements[targetIndex - 1]; // Определяем предыдущий (swim-lane) элемент, чтобы осуществлять прокрутку до него в конце скролла
 
-      // сначала скроллим к предыдущему элементу при isRandomMode
-      if (isRandomMode) {
-        targetElem.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      } else {
-        // иначе прокручиваем до элемента к позиции start
-        matchingElements[0].scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        // а затем прокручиваем к предыдущему элементу к позиции start
-        timer1 = setTimeout(() => {
-          allElements[targetIndex - 1] &&
-            allElements[targetIndex - 1].scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-        }, 700);
-      }
+      // Прокручиваем до требуемого элемента к позиции start
+      matchingElements[0].scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      // а затем прокручиваем (через 0.7 sec) к предыдущему элементу к позиции start, чтобы требуемый отображался корректно
+      timer1 = setTimeout(() => {
+        prevElem &&
+          prevElem.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 700);
     } else {
       name &&
         console.log(`Kaiten daily helper: Speaker ${name} not found on board`);
@@ -256,13 +235,32 @@ async function createWindow() {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     randomList = [];
 
+    // Добавляем в список всех спикеров с чекбоксами
     checkboxes.forEach((checkbox) => {
       checkbox.checked &&
         randomList.push(checkbox.nextElementSibling.textContent);
     });
     startListLength = randomList.length;
-    clearProgress();
-    isRandomMode && shuffleArray(randomList); // перемешиваем список, если isRandomMode
+    clearProgress(); // очищаем прогресс-бар
+
+    // Проверяем какой выбран режим списка (последовательный или рандом)?
+    const radioContainer = document.querySelectorAll(".radio-extension");
+    const listMode = Array.from(radioContainer)
+      .filter((e) => e.checked)
+      .map((e) => e.value)
+      .join("");
+    const isRandomMode = listMode === "random";
+
+    if (isRandomMode) {
+      shuffleArray(randomList); // перемешиваем список, если listMode === "random"
+    }
+
+    console.log(
+      `Kaiten daily helper: a new list was generated in ${
+        isRandomMode ? "SHUFFLE" : "SEQUENTIAL"
+      } mode ->`,
+      randomList.join(", ")
+    ); // Для отладки
 
     nextSpeakerField.textContent = "Список обновлен";
     nextSpeakerField.style.color = "rgba(128, 128, 128, 0.5)";
@@ -332,28 +330,18 @@ async function createWindow() {
     nextNameButton.disabled = false;
   }
 
-  // Слушатель радио кнопок
-  document
-    .getElementById("radioContainer")
-    .addEventListener("change", (event) => {
-      if (event.target.name === "mode") {
-        isRandomMode = event.target.value === "false";
-      }
-    });
-
   // Слушатель label имен
   const labels = Array.from(document.getElementsByClassName("checkbox-label"));
   labels.forEach((e) =>
     e.addEventListener("click", () => {
-      isRandomMode = false;
       scrollToText(e.textContent);
     })
   );
 
   // Слушатель кнопки start
-  document.getElementById("start-button").addEventListener("click", () => {
-    generateList();
-  });
+  document
+    .getElementById("start-button")
+    .addEventListener("click", generateList);
 
   // Переключение следующего спикера // TODO нужно переписать всю логику слушателя
   nextNameButton.addEventListener("click", () => {
@@ -399,7 +387,6 @@ async function createWindow() {
         );
         labels.forEach((e) =>
           e.addEventListener("click", () => {
-            isRandomMode = false;
             scrollToText(e.textContent);
           })
         );
