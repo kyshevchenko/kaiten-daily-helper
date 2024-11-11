@@ -1,7 +1,6 @@
 let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
 let startListLength; // Определение длины списка для прогресс-бара
-let consistentList = []; // последовательный список // TODO для будущего разделения списков
 let firstSwimLaneElement; // самый первый swim-lane на доске
 let currentSwimLane;
 let lastSwimLaneElement; // самый последний из списка пользователя
@@ -9,7 +8,7 @@ let maxIndex = 0;
 let listIndexes = {}; // хранилище { имя: lane-title-index }
 let timer1; // для корректной прокрутки к элементу с позиционированием вверху экрана
 let allElements; // вообще все laneTitleElements на сайте
-let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
+let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка // TODO инкапсулировать в функции
 
 // список по умолчанию при первом запуске расширения
 let dailyList = [
@@ -89,7 +88,7 @@ async function createWindow() {
         </div>
 
 
-        <div class="form-create-list" id="form-create-list">
+        <div id="form-create-list">
           <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
           <br/>
           <br/>
