@@ -8,7 +8,8 @@ let maxIndex = 0;
 let listIndexes = {}; // хранилище { имя: lane-title-index }
 let timer1; // для корректной прокрутки к элементу с позиционированием вверху экрана
 let allElements; // вообще все laneTitleElements на сайте
-let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка // TODO инкапсулировать в функции
+let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
+let centerTabPosition = true; // Положение релиз-таблицы
 
 // список по умолчанию при первом запуске расширения
 let dailyList = [
@@ -172,7 +173,7 @@ async function createWindow() {
     );
 
     if (matchingElements.length > 0) {
-      currentSwimLane = matchingElements[0];
+      currentSwimLane = matchingElements[0]; // TODO удалить, больше не требуется
       const allElements = Array.from(laneTitleElements);
 
       const targetIndex = Array.from(laneTitleElements).findIndex(
@@ -420,24 +421,46 @@ async function createWindow() {
     window.open(link, "_blank"); // Открыть ссылку в новой вкладке
   };
 
+  // Функция для изменения положения релиз-таблицы
+  const changeTabPosition = () => {
+    const tab = document.querySelector(".table-dialog");
+    const centerPosition = "table-dialog-center";
+    const rightPosition = "table-dialog-right";
+    // Меняем классы сверяя переменную для положения таблицы
+    tab.classList.add(centerTabPosition ? rightPosition : centerPosition);
+    tab.classList.remove(centerTabPosition ? centerPosition : rightPosition);
+    centerTabPosition = !centerTabPosition; // Меняем значение переменной местоположения
+  };
+
   // Функция для удаления релиз-таблицы
   const closeReleaseTable = () => {
-    const tableElem = document.querySelector(".table-dialog");
+    const tab = document.querySelector(".table-dialog");
+    const tableCloseIcon = document.querySelector(".table-close-icon");
+    const moveWindowButton = document.querySelector(".move-window");
 
-    if (tableElem) {
+    if (tab) {
       // Удаляем все слушатели событий для строк таблицы
-      const tableRows = tableElem.querySelectorAll(".custom-table-row");
+      const tableRows = tab.querySelectorAll(".custom-table-row");
       tableRows.forEach((row) => {
         row.removeEventListener("click", handleRowClick); // Удаляем слушатель
       });
 
-      // Удалем слушатель иконки закрытия окна
-      const tableCloseIcon = document.querySelector(".table-close-icon");
-      tableCloseIcon.removeEventListener("click", closeReleaseTable);
+      tableCloseIcon.removeEventListener("click", closeReleaseTable); // Удаляем слушатель иконки закрытия окна
+      moveWindowButton.removeEventListener("click", changeTabPosition); // Удаляем слушатель иконки изменения позиции окна
 
-      document.body.removeChild(tableElem); // Удаляем само окно-таблицу
+      document.body.removeChild(tab); // Удаляем само окно релиз-таблицы
       return true;
     }
+  };
+
+  // Функция для обновления релиз-таблицы
+  const updateReleaseTable = () => {
+    const updateReleaseButton = document.querySelectorAll(".update-svg");
+    // Удаляем слушатель кнопки Обновить
+    updateReleaseButton[1].removeEventListener("click", updateReleaseTable);
+
+    closeReleaseTable(); // Удаляем окно релиз-таблицы и другие слушатели событий
+    buttonDisplayReleaseTable.click(); // Открываем окно снова
   };
 
   // Слушатель кнопки для отображения релиз-таблицы
@@ -447,6 +470,7 @@ async function createWindow() {
     if (isTableOpen) return;
 
     const listBoxButton = document.querySelector(
+      // TODO пересмотреть селектор
       '.v4-MuiSelect-root[aria-haspopup="listbox"]'
     );
     if (listBoxButton) {
@@ -477,7 +501,6 @@ async function createWindow() {
 
     // Получаем все элементы <p> внутри второго дочернего <div> - это все имена тасок
     const pElems = childDivs[1].querySelectorAll("p");
-    // Преобразуем NodeList в массив и выводим в консоль
     const taskNames = Array.from(pElems);
 
     // Получаем всю инфу по таскам
@@ -537,7 +560,7 @@ async function createWindow() {
         <th>Название задачи</th>
         <th>ID</th>
         <th>Статус</th>
-        <th>Исполнитель${closeIconSvg}</th>
+        <th>Исполнитель ${updateSvg} ${moveWindowLeft} ${closeIconSvg}</th>
       </tr>
     </thead>
     <tbody>
@@ -547,7 +570,9 @@ async function createWindow() {
     `;
 
     const tableDialog = document.createElement("div");
-    tableDialog.className = "table-dialog";
+    tableDialog.className = `table-dialog ${
+      centerTabPosition ? "table-dialog-center" : "table-dialog-right"
+    }`;
     tableDialog.innerHTML = customTable;
     document.body.appendChild(tableDialog); // Начинаем отображать окно
 
@@ -558,6 +583,14 @@ async function createWindow() {
     // Слушатель событий для иконки крестика в релиз-таблице
     const tableCloseIcon = document.querySelector(".table-close-icon");
     tableCloseIcon.addEventListener("click", closeReleaseTable);
+
+    // Слушатель событий для иконки обновления в релиз-таблице
+    const updateReleaseButton = document.querySelectorAll(".update-svg");
+    updateReleaseButton[1].addEventListener("click", updateReleaseTable);
+
+    // Слушатель кнопки смены позиции окна
+    const moveWindowButton = document.querySelector(".move-window");
+    moveWindowButton.addEventListener("click", changeTabPosition);
   });
 
   // Анимация бабл-кнопки
