@@ -317,13 +317,21 @@
   position: absolute;
   background-color: black;
   border-radius: 10px;
-  max-height: 800px;
-  width: 1000px;
   overflow: auto;
+  z-index: 10000;
+}
+.table-dialog-center {
+  max-height: 800px;
+  width: 1050px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 5000;
+}
+.table-dialog-right {
+  max-height: 700px;
+  width: 750px;
+  bottom: 0;
+  right: 0;
 }
 
 /* Стили для релиз-таблицы */
@@ -391,7 +399,7 @@
   justify-content: space-between;
   padding-right: 5px;
   align-items: center;
-  min-width: 158px; 
+  min-width: 180px; 
 }
 
 /* Значок закрытия в правой части строки */
@@ -401,10 +409,7 @@
   right: 0;
   height: 16px;
   width: 16px;
-  z-index: 5002;
-}
-.update-release-table {
-  width: 18px;
+  z-index: 10002;
 }
 
 /* Стили для релиз-таблицы */
