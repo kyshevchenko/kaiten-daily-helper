@@ -385,12 +385,13 @@
   top: 0;
 }
 
-/* Стили для корректного расположения икноки крестика */
+/* Стили для корректного расположения икноки крестика и обновления */
 .custom-table-head tr th:last-child {
   display: flex;
   justify-content: space-between;
   padding-right: 5px;
   align-items: center;
+  min-width: 158px; 
 }
 
 /* Значок закрытия в правой части строки */
@@ -401,6 +402,9 @@
   height: 16px;
   width: 16px;
   z-index: 5002;
+}
+.update-release-table {
+  width: 18px;
 }
 
 /* Стили для релиз-таблицы */

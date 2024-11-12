@@ -432,13 +432,23 @@ async function createWindow() {
         row.removeEventListener("click", handleRowClick); // Удаляем слушатель
       });
 
-      // Удалем слушатель иконки закрытия окна
+      // Удаляем слушатель иконки закрытия окна
       const tableCloseIcon = document.querySelector(".table-close-icon");
       tableCloseIcon.removeEventListener("click", closeReleaseTable);
 
       document.body.removeChild(tableElem); // Удаляем само окно-таблицу
       return true;
     }
+  };
+
+  // Функция для обновления релиз-таблицы
+  const updateReleaseTable = () => {
+    const updateReleaseButton = document.querySelectorAll(".update-svg");
+    // Удаляем слушатель кнопки Обновить
+    updateReleaseButton[1].removeEventListener("click", updateReleaseTable);
+
+    closeReleaseTable(); // Удаляем окно релиз-таблицы и другие слушатели событий
+    buttonDisplayReleaseTable.click(); // Открываем окно снова
   };
 
   // Слушатель кнопки для отображения релиз-таблицы
@@ -533,7 +543,7 @@ async function createWindow() {
         <th>Название задачи</th>
         <th>ID</th>
         <th>Статус</th>
-        <th>Исполнитель${closeIconSvg}</th>
+        <th>Исполнитель ${updateSvg} ${closeIconSvg}</th>
       </tr>
     </thead>
     <tbody>
@@ -554,6 +564,10 @@ async function createWindow() {
     // Слушатель событий для иконки крестика в релиз-таблице
     const tableCloseIcon = document.querySelector(".table-close-icon");
     tableCloseIcon.addEventListener("click", closeReleaseTable);
+
+    // Слушатель событий для иконки обновления в релиз-таблице
+    const updateReleaseButton = document.querySelectorAll(".update-svg");
+    updateReleaseButton[1].addEventListener("click", updateReleaseTable);
   });
 
   // Анимация бабл-кнопки
