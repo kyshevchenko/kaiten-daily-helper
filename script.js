@@ -1,7 +1,6 @@
 let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
 let startListLength; // Определение длины списка для прогресс-бара
-let consistentList = []; // последовательный список // TODO для будущего разделения списков
 let firstSwimLaneElement; // самый первый swim-lane на доске
 let currentSwimLane;
 let lastSwimLaneElement; // самый последний из списка пользователя
@@ -90,7 +89,7 @@ async function createWindow() {
         </div>
 
 
-        <div class="form-create-list" id="form-create-list">
+        <div id="form-create-list">
           <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
           <br/>
           <br/>
@@ -353,7 +352,7 @@ async function createWindow() {
     if (randomList.length > 0) {
       nextSpeakerField.style.color = "black";
       if (randomList.length === 1) {
-        randomList[0] = `${randomList[0]} (это заключительный спикер)`; // Подсветить последнего спикера
+        randomList[0] = `${randomList[0]}\n(это заключительный спикер)`; // Подсветить последнего спикера
         nextNameButton.disabled = true;
       }
 
@@ -514,7 +513,12 @@ async function createWindow() {
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
-      if (!tasksInfo[0].textContent) tasksInfo.splice(0, 6); // если ID нет, то это пустая строка, удаляем ее // TODO переписать логику
+      if (!tasksInfo[0].textContent) tasksInfo.splice(0, 6);
+
+      /* TODO удалить после фикса проблемы с отображением релиз - таблицы при боковом скролле таблицы с релизом в Кайтене.
+      /* Временное решенение для игнорирования бага при ненахождении релиз-таблицы */
+      if (!tasksInfo[2]) return;
+      /* Удалить. */
 
       const avatarData = tasksInfo[2].querySelector("img");
       const avatar = avatarData ? `<img src=${avatarData.src}/>` : "";
