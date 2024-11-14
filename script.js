@@ -564,8 +564,8 @@ async function createWindow() {
 
     const tableDialog = document.createElement("div");
     const currentPositionClass = isCenterTabPosition
-      ? centerPosition
-      : rightPosition;
+      ? centerPositionClass
+      : rightPositionClass;
 
     tableDialog.className = `table-dialog ${currentPositionClass}`;
     tableDialog.innerHTML = customTable;
