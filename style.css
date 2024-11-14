@@ -325,15 +325,15 @@
   z-index: 10000;
 }
 .table-dialog-center {
-  max-height: 800px;
+  max-height: 73vh;
   width: 1050px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 .table-dialog-right {
-  max-height: 700px;
-  width: 750px;
+  max-height: 60vh;
+  width: 800px;
   bottom: 0;
   right: 0;
 }
@@ -414,6 +414,9 @@
   height: 16px;
   width: 16px;
   z-index: 10002;
+}
+.table-close-icon, .move-window, .update-svg {
+  cursor: pointer;
 }
 
 /* Стили для релиз-таблицы */

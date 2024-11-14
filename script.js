@@ -1,15 +1,14 @@
 let windowOpen = false;
 let randomList = []; // список для отображения кадого следующего спикера
-let startListLength; // Определение длины списка для прогресс-бара
+let startListLength; // Определение длины списка для прогресс-бара // TODO инкапсулировать в функции
 let firstSwimLaneElement; // самый первый swim-lane на доске
 let currentSwimLane;
 let lastSwimLaneElement; // самый последний из списка пользователя
 let maxIndex = 0;
-let listIndexes = {}; // хранилище { имя: lane-title-index }
+let listIndexes = {}; // хранилище { имя: lane-title-index } // TODO инкапсулировать в функцию сохранения списка
 let timer1; // для корректной прокрутки к элементу с позиционированием вверху экрана
 let allElements; // вообще все laneTitleElements на сайте
 let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
-let centerTabPosition = true; // Положение релиз-таблицы
 
 // список по умолчанию при первом запуске расширения
 let dailyList = [
@@ -100,7 +99,7 @@ async function createWindow() {
         <div class="bottom-block">
           <div class="bottom-buttons">
             <button class="bubbly-button" id="start-button">Начать заново${updateSvg}</button>
-            <button class="bubbly-button" id="next-name">Кто следующий?</button>
+            <button class="bubbly-button" id="next-name">Кто следующий ?</button>
          </div>
          <div class="progress-bar">
             ${progressBarSvg}
@@ -126,9 +125,14 @@ async function createWindow() {
   const buttonFormCreateList = document.getElementById(
     "button-form-create-list"
   );
+
+  // Данные для релиз-таблицы
   const buttonDisplayReleaseTable = document.getElementById(
     "button-display-release-table"
   );
+  let isCenterReleaseTabPosition = true;
+  const centerPositionClass = "table-dialog-center";
+  const rightPositionClass = "table-dialog-right";
 
   // Переменные прогресс-бара
   const circle = document.querySelector(".progress-bar-circle");
@@ -151,16 +155,9 @@ async function createWindow() {
     circle.style.strokeDashoffset = circleLength;
   }
 
-  // Функция для очистки всех тайм-аутов
-  function clearAllTimeout(timersArray) {
-    for (const t of timersArray) {
-      clearTimeout(t);
-    }
-  }
-
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearAllTimeout([timer1]); // убираем все таймауты скролла предыдущего клика //
+    clearTimeout(timer1) // убираем таймаут скролла предыдущего клика
 
     // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const laneTitleElements = document.querySelectorAll(
@@ -251,18 +248,12 @@ async function createWindow() {
       .join("");
     const isRandomMode = listMode === "random";
 
-    if (isRandomMode) {
-      shuffleArray(randomList); // перемешиваем список, если listMode === "random"
-    }
+    // перемешиваем список, если isRandomMode
+    if (isRandomMode) shuffleArray(randomList);
 
-    console.log(
-      `Kaiten daily helper: a new list was generated in ${
-        isRandomMode ? "SHUFFLE" : "SEQUENTIAL"
-      } mode ->`,
-      randomList.join(", ")
-    ); // Для отладки
-
-    nextSpeakerField.textContent = "Список обновлен";
+    nextSpeakerField.textContent = `Список обновлен.\n(${
+      isRandomMode ? "рандомный" : "последовательный"
+    } порядок)`;
     nextSpeakerField.style.color = "rgba(128, 128, 128, 0.5)";
 
     const laneTitleElements = document.querySelectorAll(
@@ -418,18 +409,17 @@ async function createWindow() {
   const handleRowClick = (event) => {
     const taskId = event.currentTarget.getAttribute("data-id");
     const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
-    window.open(link, "_blank"); // Открыть ссылку в новой вкладке
+    window.open(link, "_blank");
   };
 
   // Функция для изменения положения релиз-таблицы
   const changeTabPosition = () => {
     const tab = document.querySelector(".table-dialog");
-    const centerPosition = "table-dialog-center";
-    const rightPosition = "table-dialog-right";
-    // Меняем классы сверяя переменную для положения таблицы
-    tab.classList.add(centerTabPosition ? rightPosition : centerPosition);
-    tab.classList.remove(centerTabPosition ? centerPosition : rightPosition);
-    centerTabPosition = !centerTabPosition; // Меняем значение переменной местоположения
+
+    // Меняем классы и переменную для положения таблицы
+    tab.classList.add(isCenterReleaseTabPosition ? rightPositionClass : centerPositionClass);
+    tab.classList.remove(isCenterReleaseTabPosition ? centerPositionClass : rightPositionClass);
+    isCenterReleaseTabPosition = !isCenterReleaseTabPosition;
   };
 
   // Функция для удаления релиз-таблицы
@@ -570,9 +560,8 @@ async function createWindow() {
     `;
 
     const tableDialog = document.createElement("div");
-    tableDialog.className = `table-dialog ${
-      centerTabPosition ? "table-dialog-center" : "table-dialog-right"
-    }`;
+
+    tableDialog.className = `table-dialog ${isCenterReleaseTabPosition ? centerPositionClass : rightPositionClass}`;
     tableDialog.innerHTML = customTable;
     document.body.appendChild(tableDialog); // Начинаем отображать окно
 
