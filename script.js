@@ -130,7 +130,7 @@ async function createWindow() {
   const buttonDisplayReleaseTable = document.getElementById(
     "button-display-release-table"
   );
-  let isCenterReleaseTabPosition = true;
+  let isCenterTabPosition = true;
   const centerPositionClass = "table-dialog-center";
   const rightPositionClass = "table-dialog-right";
 
@@ -157,7 +157,7 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearTimeout(timer1) // убираем таймаут скролла предыдущего клика
+    clearTimeout(timer1); // убираем таймаут скролла предыдущего клика
 
     // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const laneTitleElements = document.querySelectorAll(
@@ -203,7 +203,7 @@ async function createWindow() {
         behavior: "smooth",
         block: "start",
       });
-      // а затем прокручиваем (через 0.7 sec) к предыдущему элементу к позиции start, чтобы требуемый отображался корректно
+      // а затем прокручиваем к предыдущему элементу к позиции start, чтобы требуемый отображался корректно
       timer1 = setTimeout(() => {
         prevElem &&
           prevElem.scrollIntoView({
@@ -417,9 +417,13 @@ async function createWindow() {
     const tab = document.querySelector(".table-dialog");
 
     // Меняем классы и переменную для положения таблицы
-    tab.classList.add(isCenterReleaseTabPosition ? rightPositionClass : centerPositionClass);
-    tab.classList.remove(isCenterReleaseTabPosition ? centerPositionClass : rightPositionClass);
-    isCenterReleaseTabPosition = !isCenterReleaseTabPosition;
+    tab.classList.add(
+      isCenterTabPosition ? rightPositionClass : centerPositionClass
+    );
+    tab.classList.remove(
+      isCenterTabPosition ? centerPositionClass : rightPositionClass
+    );
+    isCenterTabPosition = !isCenterTabPosition;
   };
 
   // Функция для удаления релиз-таблицы
@@ -459,12 +463,9 @@ async function createWindow() {
     const isTableOpen = closeReleaseTable();
     if (isTableOpen) return;
 
-    const listBoxButton = document.querySelector(
-      // TODO пересмотреть селектор
-      '.v4-MuiSelect-root[aria-haspopup="listbox"]'
-    );
-    if (listBoxButton) {
-      listBoxButton.focus(); // Устанавливаем фокус на кнопке
+    const dporMenuButton = document.querySelector('[aria-haspopup="listbox"]');
+    if (dporMenuButton) {
+      dporMenuButton.focus();
 
       // Создаем событие для эмуляции нажатия клавиши "ArrowDown"
       const keyDownEvent = new KeyboardEvent("keydown", {
@@ -473,15 +474,17 @@ async function createWindow() {
         keyCode: 40,
         bubbles: true,
       });
-      listBoxButton.dispatchEvent(keyDownEvent);
+      dporMenuButton.dispatchEvent(keyDownEvent);
     } else {
       console.log("Kaiten daily helper: release table not found!");
       return;
     }
 
-    const listbox = document.querySelector('[role="listbox"]'); // Находим список для смены отображения таблиц
-    const tableValue = listbox.querySelector('[data-value="1"]'); // Находим value для вида Таблица
-    tableValue.click(); // меняем значение, чтобы переключиться на вид "Таблица"
+    const dporMenu = document.querySelector('[role="listbox"]'); // Находим кнопку для смены вида таблицы
+    const tableViewValue = dporMenu.querySelector('[data-value="1"]'); // Находим value для вида Table
+    const ListViewValue = dporMenu.querySelector('[data-value="3"]'); // Находим value для вида List
+    ListViewValue.click();
+    tableViewValue.click();
 
     // Копирование всех данных из таблицы
     const tableContent = document.querySelector('[data-test="some"]');
@@ -498,7 +501,7 @@ async function createWindow() {
       (child) => child.tagName === "DIV"
     );
 
-    tasksInfo.splice(0, 6);
+    tasksInfo.splice(0, 6); // Удаляем первые 7 элементов для дальнейшей корректной работы
     const info = {}; // сюда собираем всю инф
     let count = 1; // счетчик количества тасок
 
@@ -560,8 +563,11 @@ async function createWindow() {
     `;
 
     const tableDialog = document.createElement("div");
+    const currentPositionClass = isCenterTabPosition
+      ? centerPosition
+      : rightPosition;
 
-    tableDialog.className = `table-dialog ${isCenterReleaseTabPosition ? centerPositionClass : rightPositionClass}`;
+    tableDialog.className = `table-dialog ${currentPositionClass}`;
     tableDialog.innerHTML = customTable;
     document.body.appendChild(tableDialog); // Начинаем отображать окно
 
