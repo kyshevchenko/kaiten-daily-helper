@@ -30,13 +30,12 @@ function getListFromStorage() {
 
 // создание встроенного html-окна
 async function createWindow() {
-  if (document.getElementById("my-extension-container")) {
+  if (document.getElementById("extension-container")) {
     return;
   }
 
   const container = document.createElement("div");
-  container.id = "my-extension-container";
-  container.className = "extension-container";
+  container.id = "extension-container";
 
   // запрашиваем сохраненный ранее список в Хроме и устанавливаем его в defaultList
   await getListFromStorage();
@@ -64,7 +63,7 @@ async function createWindow() {
             <input class="switch-checkbox" type="checkbox">
             <span class="switch-slider round"></span>
           </label>
-          <span>Перемешать</span>
+          <span class="switch-label">Перемешать</span>
         </div>
 
         <div class="side-menu">
@@ -289,7 +288,7 @@ async function createWindow() {
   }
 
   // Слушатель label имен
-  const labels = Array.from(document.getElementsByClassName("label-name")); // TODO заменить класс
+  const labels = Array.from(document.getElementsByClassName("label-name"));
   labels.forEach((e) =>
     e.addEventListener("click", () => {
       scrollToText(e.textContent);
@@ -613,7 +612,7 @@ function saveListToStorage(newList) {
 }
 
 function toggleWindow() {
-  const container = document.getElementById("my-extension-container");
+  const container = document.getElementById("extension-container");
   if (container) {
     const newDisplay = container.style.display === "none" ? "block" : "none";
     container.style.display = newDisplay;

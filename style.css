@@ -1,37 +1,38 @@
-.extension-container{
+#extension-container{
   position: fixed;
   display: block;
   top: 0;
   right: 0;
-  width: 260px;
+  width: 235px;
   min-height: 200px;
   height: auto;
   background-color: white;
   border: 1px solid #ddd;
   z-index: 9999;
   border-radius: 0 0 0 15px;
-  padding-left: 20px;
+  padding-left: 10px;
   overflow: hidden;
 }
 
-.checkbox-label, #radioContainer, #speaker {
+.label-name, #radio-container, #speaker, .switch-label {
   background-color: white;
   border-radius: 3px;
   color: black;
   font-family: Arial, sans-serif;
   padding-left: 5px;
 }
-.checkbox-label {
+.label-name {
   cursor: pointer;
   transition: font-size 0.2s ease, transform 0.2s ease;
 }
-.checkbox-label:active {
+.label-name:active {
   font-size: 0.90em;
 }
 
 #speaker {
   height: 12px;
   margin-top: 0;
+  padding-bottom: 5px;
   white-space: pre-line;
 }
 
@@ -49,8 +50,8 @@
   margin-top: 10px;
 }
 .bottom-buttons button {
-  width: fit-content;
   margin-top: 10px;
+  width: 125px;
 }
 
 .progress-bar-circle {
