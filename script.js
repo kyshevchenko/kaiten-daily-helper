@@ -1,17 +1,10 @@
 let windowOpen = false;
-let randomList = []; // список для отображения кадого следующего спикера
-let startListLength; // Определение длины списка для прогресс-бара // TODO инкапсулировать в функции
-let firstSwimLaneElement; // самый первый swim-lane на доске
-let currentSwimLane;
-let lastSwimLaneElement; // самый последний из списка пользователя
-let maxIndex = 0;
-let listIndexes = {}; // хранилище { имя: lane-title-index } // TODO инкапсулировать в функцию сохранения списка
-let timer1; // для корректной прокрутки к элементу с позиционированием вверху экрана
-let allElements; // вообще все laneTitleElements на сайте
-let hasAllNamesOnBoard; // признак для обозначения отсутствия имени на доске в Кайтен при сохранении нового списка
+let dailyList = []; // Список для отображения кадого следующего спикера
+let speakersCount; // Количество спикеров для прогресс-бара // TODO убрать в функции
+let timer; // для корректной прокрутки к элементу с позиционированием вверху экрана
 
 // список по умолчанию при первом запуске расширения
-let dailyList = [
+let defaultList = [
   "Яна",
   "Саша",
   "Кирилл",
@@ -26,7 +19,7 @@ function getListFromStorage() {
   return new Promise((resolve) => {
     chrome.storage.sync.get("ownList", (result) => {
       if (result.ownList) {
-        dailyList = result.ownList;
+        defaultList = result.ownList;
       } else {
         console.log("Kaiten daily helper: No own list in chrome's storage");
       }
@@ -45,7 +38,7 @@ async function createWindow() {
   container.id = "my-extension-container";
   container.className = "extension-container";
 
-  // запрашиваем сохраненный ранее список в Хроме и устанавливаем его в dailyList
+  // запрашиваем сохраненный ранее список в Хроме и устанавливаем его в defaultList
   await getListFromStorage();
 
   const generateHTMLList = (list) => {
@@ -63,7 +56,7 @@ async function createWindow() {
   container.innerHTML = `
       <div >
         <div class="list" id="list">
-        ${generateHTMLList(dailyList)}
+        ${generateHTMLList(defaultList)}
         </div id="list">
 
         <br/>
@@ -142,22 +135,22 @@ async function createWindow() {
 
   // Функция установки значения прогресс-бара
   function setProgress() {
-    const currentProgress = startListLength - randomList.length + 1;
-    const progressPercentage = (currentProgress / startListLength) * 100;
+    const currentProgress = speakersCount - dailyList.length + 1;
+    const progressPercentage = (currentProgress / speakersCount) * 100;
     const circleFillValue =
       circleLength - (progressPercentage / 100) * circleLength;
     circle.style.strokeDashoffset = circleFillValue;
-    progressValue.textContent = `${currentProgress}/${startListLength}`;
+    progressValue.textContent = `${currentProgress}/${speakersCount}`;
   }
   // Функция очистки прогресс-бара
   function clearProgress() {
-    progressValue.textContent = `0/${startListLength}`;
+    progressValue.textContent = `0/${speakersCount}`;
     circle.style.strokeDashoffset = circleLength;
   }
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearTimeout(timer1); // убираем таймаут скролла предыдущего клика
+    clearTimeout(timer); // убираем таймаут скролла предыдущего клика
 
     // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const laneTitleElements = document.querySelectorAll(
@@ -170,14 +163,12 @@ async function createWindow() {
     );
 
     if (matchingElements.length > 0) {
-      currentSwimLane = matchingElements[0]; // TODO удалить, больше не требуется
       const allElements = Array.from(laneTitleElements);
 
       const targetIndex = Array.from(laneTitleElements).findIndex(
         (e) => e === matchingElements[0]
       );
 
-      /* скролл к самому первому элементу на доске */
       // находим все доски на странице и элементы с именами на ней
       const boardContainer = matchingElements[0].closest(
         '[data-test="board-container"]'
@@ -193,18 +184,17 @@ async function createWindow() {
         });
         return;
       }
-      /* скролл к самому первому элементу на доске */
 
       /* Если это не первый элемент на доске, выполняем другую логику скролла */
-      const prevElem = allElements[targetIndex - 1]; // Определяем предыдущий (swim-lane) элемент, чтобы осуществлять прокрутку до него в конце скролла
+      const prevElem = allElements[targetIndex - 1]; // Определяем предыдущий (swim-lane) элемент, чтобы впоследствии осуществлять прокрутку до него
 
-      // Прокручиваем до требуемого элемента к позиции start
+      // Сначала рокручиваем до требуемого элемента к позиции start
       matchingElements[0].scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
       // а затем прокручиваем к предыдущему элементу к позиции start, чтобы требуемый отображался корректно
-      timer1 = setTimeout(() => {
+      timer = setTimeout(() => {
         prevElem &&
           prevElem.scrollIntoView({
             behavior: "smooth",
@@ -230,26 +220,28 @@ async function createWindow() {
   // Функция для генерации списка (обычного и рандомного)
   function generateList() {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    randomList = [];
+    dailyList = [];
+    // const namesIndexes = {};
+    // let maxIndex = 0;
 
     // Добавляем в список всех спикеров с чекбоксами
     checkboxes.forEach((checkbox) => {
       checkbox.checked &&
-        randomList.push(checkbox.nextElementSibling.textContent);
+        dailyList.push(checkbox.nextElementSibling.textContent);
     });
-    startListLength = randomList.length;
+    speakersCount = dailyList.length; // Уcтанавливаем количество в прогресс-бар
     clearProgress(); // очищаем прогресс-бар
 
     // Проверяем какой выбран режим списка (последовательный или рандом)?
     const radioContainer = document.querySelectorAll(".radio-extension");
-    const listMode = Array.from(radioContainer)
+    const choosenMode = Array.from(radioContainer)
       .filter((e) => e.checked)
       .map((e) => e.value)
       .join("");
-    const isRandomMode = listMode === "random";
+    const isRandomMode = choosenMode === "random";
 
     // перемешиваем список, если isRandomMode
-    if (isRandomMode) shuffleArray(randomList);
+    if (isRandomMode) shuffleArray(dailyList);
 
     nextSpeakerField.textContent = `Список обновлен.\n(${
       isRandomMode ? "рандомный" : "последовательный"
@@ -261,60 +253,44 @@ async function createWindow() {
     );
 
     if (laneTitleElements.length) {
-      // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
-      firstSwimLaneElement =
-        Array.from(laneTitleElements)[0].textContent.trim(); // получаем самый первый swim-lane элемент name
-
-      // а теперь получаем самый нижний элемент чтобы опускаться в самый низ при рандомного скролле
-      for (const name of randomList) {
+      // ищем все доски согласно отмеченному списку спикеров
+      for (const name of dailyList) {
         const matchingElements = Array.from(laneTitleElements).filter(
           (element) => {
             return element.textContent.trim() === name;
           }
         );
-
-        allElements = Array.from(laneTitleElements);
-        const targetIndex = Array.from(laneTitleElements).findIndex(
-          (e) => e === matchingElements[0]
-        );
-
-        const prevElem =
-          targetIndex > 0 ? allElements[targetIndex - 1] : matchingElements[0];
-
-        listIndexes[name] = targetIndex;
-      }
-
-      for (const key in listIndexes) {
-        if (listIndexes[key] > maxIndex) {
-          maxIndex = listIndexes[key];
+        if (matchingElements.length === 0) {
+          nextSpeakerField.textContent =
+            "Не все имена найдены на странице Kaiten, измените список.";
+          return;
         }
       }
-
-      lastSwimLaneElement = allElements[maxIndex]; // получаем элемент lastSwimLaneElement
     } else {
       console.log("Kaiten daily helper: Kaiten board not found");
     }
 
-    // раскрытие всех свернутых swim-lane c именами из списка спикеров
-    const allLanes = document.querySelectorAll('div[data-test="lane"]');
-    let index = 0;
-
-    // функция раскрытия каждой lane, запускаем через seTimeout чтобы не было тормозов
+    // Функция раскрытия всех досок // TODO вынести в отдельный файл
     function openLanes() {
-      if (index >= allLanes.length) return; // Завершить, если все обработаны
+      const allLanes = document.querySelectorAll('div[data-test="lane"]');
+      let index = 0;
 
-      const lane = allLanes[index];
-      const columns = lane.querySelectorAll('[data-test="column"]');
+      // if (index >= allLanes.length) return; // Завершить, если все обработаны
+      while (index < allLanes.length) {
+        const lane = allLanes[index];
+        const columns = lane.querySelectorAll('[data-test="column"]');
 
-      if (!columns.length) {
-        const collapseButton = lane.querySelector(
-          '[data-test="title-collapse-button"]'
-        );
-        if (collapseButton) collapseButton.click();
+        if (!columns.length) {
+          const collapseButton = lane.querySelector(
+            '[data-test="title-collapse-button"]'
+          );
+          if (collapseButton) {
+            const click = () => collapseButton.click();
+            setTimeout(click, 0); // запускаем в setTimeout чтобы доски раскрылись без тормозов
+          }
+        }
+        index++;
       }
-
-      index++;
-      setTimeout(openLanes, 0);
     }
 
     openLanes();
@@ -337,18 +313,18 @@ async function createWindow() {
   // Переключение следующего спикера // TODO нужно переписать всю логику слушателя
   nextNameButton.addEventListener("click", () => {
     setProgress();
-    scrollToText(randomList[0]);
+    scrollToText(dailyList[0]);
 
     // Обновление списка спикеров
-    if (randomList.length > 0) {
+    if (dailyList.length > 0) {
       nextSpeakerField.style.color = "black";
-      if (randomList.length === 1) {
-        randomList[0] = `${randomList[0]}\n(это заключительный спикер)`; // Подсветить последнего спикера
+      if (dailyList.length === 1) {
+        dailyList[0] = `${dailyList[0]}\n(это заключительный спикер)`; // Подсветить последнего спикера
         nextNameButton.disabled = true;
       }
 
-      nextSpeakerField.textContent = randomList[0]; // Показываем первый элемент в списке спикеров
-      randomList.shift(); // Удаляем первый элемент
+      nextSpeakerField.textContent = dailyList[0]; // Показываем первый элемент в списке спикеров
+      dailyList.shift(); // Удаляем первый элемент
     }
 
     animateLeaf(); // Включаем падающий лист
@@ -382,7 +358,7 @@ async function createWindow() {
           })
         );
       } else {
-        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Скорректируйте список и сохраните еще раз.`;
+        inputNames.value = `${inputNames.value} \nНекоторые имена не были найдены на доске Кайтен. Измените список и сохраните еще раз.`;
       }
     });
 
@@ -465,9 +441,7 @@ async function createWindow() {
 
     const dporMenuButton = document.querySelector('[aria-haspopup="listbox"]');
     if (dporMenuButton) {
-      dporMenuButton.focus();
-
-      // Создаем событие для эмуляции нажатия клавиши "ArrowDown"
+      // Эмуляция нажатия клавиши "ArrowDown"
       const keyDownEvent = new KeyboardEvent("keydown", {
         key: "ArrowDown",
         code: "ArrowDown",
@@ -480,9 +454,9 @@ async function createWindow() {
       return;
     }
 
-    const dporMenu = document.querySelector('[role="listbox"]'); // Находим кнопку для смены вида таблицы
-    const tableViewValue = dporMenu.querySelector('[data-value="1"]'); // Находим value для вида Table
-    const ListViewValue = dporMenu.querySelector('[data-value="3"]'); // Находим value для вида List
+    const dporMenu = document.querySelector('[role="listbox"]'); // Кнопка для смены вида таблицы
+    const tableViewValue = dporMenu.querySelector('[data-value="1"]'); // value для вида Table
+    const ListViewValue = dporMenu.querySelector('[data-value="3"]'); // value для вида List
     ListViewValue.click();
     tableViewValue.click();
 
@@ -507,11 +481,6 @@ async function createWindow() {
 
     while (tasksInfo.length > 0) {
       if (!tasksInfo[0].textContent) tasksInfo.splice(0, 6);
-
-      /* TODO удалить после фикса проблемы с отображением релиз - таблицы при боковом скролле таблицы с релизом в Кайтене.
-      /* Временное решенение для игнорирования бага при ненахождении релиз-таблицы */
-      if (!tasksInfo[2]) return;
-      /* Удалить. */
 
       const avatarData = tasksInfo[2].querySelector("img");
       const avatar = avatarData ? `<img src=${avatarData.src}/>` : "";
@@ -604,12 +573,11 @@ function saveListToStorage(newList) {
 
   // сортируем согласно располжению swim-lane в Кайтене
   if (laneTitleElements.length) {
-    // получаем самый верхний элемент для костыля скролла на самый верх в Кайтене
-    firstSwimLaneElement = Array.from(laneTitleElements)[0].textContent.trim(); // получаем самый первый swim-lane элемент name
-    hasAllNamesOnBoard = true;
-    listIndexes = {}; // очищаем listIndexes
+    let hasAllNamesOnBoard = true;
+    const namesIndexes = {};
+    let maxIndex = 0;
 
-    // а теперь получаем самый нижний элемент чтобы опускаться в самый низ при рандомного скролле
+    // Ищем выбранные имена на досках в Кайтене
     for (const name of newList) {
       const matchingElements = Array.from(laneTitleElements).filter(
         (element) => {
@@ -617,26 +585,23 @@ function saveListToStorage(newList) {
         }
       );
 
-      allElements = Array.from(laneTitleElements);
       const targetIndex = Array.from(laneTitleElements).findIndex(
         (e) => e === matchingElements[0]
       );
 
-      listIndexes[name] = targetIndex;
+      namesIndexes[name] = targetIndex;
       if (targetIndex === -1) hasAllNamesOnBoard = false; // будем возвращать false, если хотя бы одно имя на доске не найдено
     }
 
     // находим максимальный индекс swim-lane
-    for (const key in listIndexes) {
-      if (listIndexes[key] > maxIndex) {
-        maxIndex = listIndexes[key];
+    for (const key in namesIndexes) {
+      if (namesIndexes[key] > maxIndex) {
+        maxIndex = namesIndexes[key];
       }
     }
 
-    lastSwimLaneElement = allElements[maxIndex]; // получаем элемент lastSwimLaneElement
-
     // сортируем новый список
-    const sortedListArray = Object.entries(listIndexes).sort(
+    const sortedListArray = Object.entries(namesIndexes).sort(
       (a, b) => a[1] - b[1]
     );
     const sortedListNamesIndex = Object.fromEntries(sortedListArray);
@@ -688,6 +653,7 @@ function setLeafColor() {
     autumnColors[Math.floor(Math.random() * autumnColors.length)];
   document.querySelector("#leafSvg .st0").style.fill = randomColor;
 }
+
 function animateLeaf() {
   const leaf = document.querySelector(".leaf");
 
@@ -723,18 +689,9 @@ function animateLeaf() {
 }
 // функции падающего листа для осени
 
-// слушатель фонового обработчика backgrounds.js
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "toggleWindow") {
-    toggleWindow();
-    sendResponse({ windowOpen });
-  }
-});
-
 // Анимация бабл-кнопки
 function animateButton(e) {
   e.preventDefault;
-  //reset animation
   e.target.classList.remove("animate");
 
   e.target.classList.add("animate");
@@ -743,3 +700,11 @@ function animateButton(e) {
   }, 700);
 }
 // Анимация бабл-кнопки
+
+// слушатель фонового обработчика backgrounds.js
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "toggleWindow") {
+    toggleWindow();
+    sendResponse({ windowOpen });
+  }
+});
