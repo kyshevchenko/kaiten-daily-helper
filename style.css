@@ -114,10 +114,73 @@
 }
 
 /* Стили для радио-кнопок */
-#radioContainer input[type="radio"]:checked,
-#checkboxContainer input[type="checkbox"]:checked {
+.switch-daily input:checked,
+#checkbox-container input:checked {
   accent-color: green;
 }
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 5px;
+}
+
+.switch-daily {
+  position: relative;
+  display: inline-block;
+  width: 31px;
+  height: 19px;
+}
+
+.switch-daily input {display:none;}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .switch-slider {
+  background-color: green;
+}
+
+input:focus + .switch-slider {
+  box-shadow: 0 0 1px green;
+}
+
+input:checked + .switch-slider:before {
+  -webkit-transform: translateX(13px);
+  -ms-transform: translateX(13px);
+  transform: translateX(13px);
+}
+
+.switch-slider.round {
+  border-radius: 19px;
+}
+
+.switch-slider.round:before {
+  border-radius: 50%;
+}
+/* Стили для switch радио-кнопки */
 
 /* x5 svg */
 .x5-svg {

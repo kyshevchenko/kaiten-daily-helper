@@ -45,9 +45,9 @@ async function createWindow() {
     return list
       .map(
         (e, i) => `
-    <div id="checkboxContainer">
-      <input class="checkbox-extension" type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
-      <label class="checkbox-label">${e}</label><br>
+    <div id="checkbox-container">
+      <input class="checkbox-name" type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
+      <label class="label-name">${e}</label><br>
     </div>`
       )
       .join("");
@@ -59,13 +59,12 @@ async function createWindow() {
         ${generateHTMLList(defaultList)}
         </div id="list">
 
-        <br/>
-        <div id="radioContainer">
-          <input class="radio-extension" checked type="radio" value="consistent" id="consistent-mode" name="mode"/>
-          <label class="radio-label-extension"for="consistent-mode">Последовательный порядок</label>
-          <br/>
-          <input class="radio-extension" type="radio" value="random" id="random-mode" name="mode"/>
-          <label for="random-mode">Перемешать</label>
+        <div class="switch-container">
+          <label class="switch-daily">
+            <input class="switch-checkbox" type="checkbox">
+            <span class="switch-slider round"></span>
+          </label>
+          <span>Перемешать</span>
         </div>
 
         <div class="side-menu">
@@ -79,7 +78,6 @@ async function createWindow() {
              <p class="tooltip">Показать/скрыть таблицу релиза</p>
           </div>
         </div>
-
 
         <div id="form-create-list">
           <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
@@ -219,13 +217,11 @@ async function createWindow() {
 
   // Функция для генерации списка (обычного и рандомного)
   function generateList() {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const namesCheckboxes = document.querySelectorAll(".checkbox-name");
     dailyList = [];
-    // const namesIndexes = {};
-    // let maxIndex = 0;
 
     // Добавляем в список всех спикеров с чекбоксами
-    checkboxes.forEach((checkbox) => {
+    namesCheckboxes.forEach((checkbox) => {
       checkbox.checked &&
         dailyList.push(checkbox.nextElementSibling.textContent);
     });
@@ -233,13 +229,8 @@ async function createWindow() {
     clearProgress(); // очищаем прогресс-бар
 
     // Проверяем какой выбран режим списка (последовательный или рандом)?
-    const radioContainer = document.querySelectorAll(".radio-extension");
-    const choosenMode = Array.from(radioContainer)
-      .filter((e) => e.checked)
-      .map((e) => e.value)
-      .join("");
-    const isRandomMode = choosenMode === "random";
-
+    const isRandomMode =
+      document.querySelector(".switch-checkbox").checked === true;
     // перемешиваем список, если isRandomMode
     if (isRandomMode) shuffleArray(dailyList);
 
@@ -298,7 +289,7 @@ async function createWindow() {
   }
 
   // Слушатель label имен
-  const labels = Array.from(document.getElementsByClassName("checkbox-label"));
+  const labels = Array.from(document.getElementsByClassName("label-name")); // TODO заменить класс
   labels.forEach((e) =>
     e.addEventListener("click", () => {
       scrollToText(e.textContent);
@@ -350,7 +341,7 @@ async function createWindow() {
 
         // слушатель label имен в новом списке //TODO убрать дублирование (вынести в функции все слушатели)
         const labels = Array.from(
-          document.getElementsByClassName("checkbox-label")
+          document.getElementsByClassName("label-name")
         );
         labels.forEach((e) =>
           e.addEventListener("click", () => {
