@@ -464,22 +464,37 @@ input:checked + .switch-slider:before {
 .custom-table-head tr th:last-child {
   display: flex;
   justify-content: space-between;
-  padding-right: 5px;
+  /* padding-right: 5px; */
   align-items: center;
-  min-width: 180px; 
+  min-width: 140px; 
 }
 
-/* Значок закрытия в правой части строки */
-.table-close-icon {
-  position: sticky;
-  top: 5px;
+.window-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  height: 20px;
   right: 0;
-  height: 16px;
-  width: 16px;
-  z-index: 10002;
 }
-.table-close-icon, .move-window, .update-svg {
+.window-button-container svg {
+  /* height: 100%; */
+  width: 20px;
+  display: block;
+}
+
+/* Иконки закрытия и ресайза окна */
+.table-close-icon {
+  padding-top: 4px;
+}
+.resize-window {
+  transform: rotate(90deg);
+}
+.table-dialog-right .resize-window  {
+  transform: rotate(270deg);
+}
+
+.table-close-icon, .resize-window, .update-svg {
   cursor: pointer;
 }
-
 /* Стили для релиз-таблицы */

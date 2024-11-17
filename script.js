@@ -396,7 +396,7 @@ async function createWindow() {
   const closeReleaseTable = () => {
     const tab = document.querySelector(".table-dialog");
     const tableCloseIcon = document.querySelector(".table-close-icon");
-    const moveWindowButton = document.querySelector(".move-window");
+    const resizeWindowButton = document.querySelector(".resize-window");
 
     if (tab) {
       // Удаляем все слушатели событий для строк таблицы
@@ -406,7 +406,7 @@ async function createWindow() {
       });
 
       tableCloseIcon.removeEventListener("click", closeReleaseTable); // Удаляем слушатель иконки закрытия окна
-      moveWindowButton.removeEventListener("click", changeTabPosition); // Удаляем слушатель иконки изменения позиции окна
+      resizeWindowButton.removeEventListener("click", changeTabPosition); // Удаляем слушатель иконки изменения позиции окна
 
       document.body.removeChild(tab); // Удаляем само окно релиз-таблицы
       return true;
@@ -512,7 +512,9 @@ async function createWindow() {
         <th>Название задачи</th>
         <th>ID</th>
         <th>Статус</th>
-        <th>Исполнитель ${updateSvg} ${moveWindowLeft} ${closeIconSvg}</th>
+        <th>Исполнитель
+          <div class="window-button-container">${updateSvg} ${resizeWindow} ${closeIconSvg}</div>
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -543,8 +545,8 @@ async function createWindow() {
     updateReleaseButton[1].addEventListener("click", updateReleaseTable);
 
     // Слушатель кнопки смены позиции окна
-    const moveWindowButton = document.querySelector(".move-window");
-    moveWindowButton.addEventListener("click", changeTabPosition);
+    const resizeWindowButton = document.querySelector(".resize-window");
+    resizeWindowButton.addEventListener("click", changeTabPosition);
   });
 
   // Анимация бабл-кнопки
