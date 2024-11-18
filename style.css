@@ -123,7 +123,7 @@
 .switch-container {
   display: flex;
   align-items: center;
-  padding-top: 5px;
+  padding-top: 10px;
 }
 
 .switch-daily {
@@ -501,3 +501,32 @@ input:checked + .switch-slider:before {
   cursor: pointer;
 }
 /* Стили для релиз-таблицы */
+
+/* Стили для свечи */
+.candle-container  {
+  display: none;
+  justify-content: center;
+  align-items: flex-end;
+  height: 0;
+  padding: 0;
+}
+
+.candle {
+  background: url(https://assets.codepen.io/2015738/candle.png) no-repeat
+    0px 0px;
+  display: block;
+  width: 200px;
+  height: 280px;
+  animation: candle 6s steps(160) infinite;
+  z-index: 6;
+}
+
+@keyframes candle {
+  0% {
+    background-position: 0px 0;
+  }
+  100% {
+    background-position: -32000px 0;
+  }
+}
+/* Стили для свечи */

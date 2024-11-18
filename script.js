@@ -392,11 +392,18 @@ async function createWindow() {
     isCenterTabPosition = !isCenterTabPosition;
   };
 
+  // Функция для добавления свечи
+  const showCandle = () => {
+    const candle = document.querySelector(".candle-container");
+    candle.style.display = "flex";
+  };
+
   // Функция для удаления релиз-таблицы
   const closeReleaseTable = () => {
     const tab = document.querySelector(".table-dialog");
     const tableCloseIcon = document.querySelector(".table-close-icon");
     const resizeWindowButton = document.querySelector(".resize-window");
+    const candleActivator = document.querySelector(".candle-activator");
 
     if (tab) {
       // Удаляем все слушатели событий для строк таблицы
@@ -407,6 +414,7 @@ async function createWindow() {
 
       tableCloseIcon.removeEventListener("click", closeReleaseTable); // Удаляем слушатель иконки закрытия окна
       resizeWindowButton.removeEventListener("click", changeTabPosition); // Удаляем слушатель иконки изменения позиции окна
+      candleActivator.removeEventListener("click", showCandle); // Удаляем слушатель для свечи
 
       document.body.removeChild(tab); // Удаляем само окно релиз-таблицы
       return true;
@@ -511,7 +519,7 @@ async function createWindow() {
       <tr>
         <th>Название задачи</th>
         <th>ID</th>
-        <th>Статус</th>
+        <th class="candle-activator">Статус</th>
         <th>Исполнитель
           <div class="window-button-container">${updateSvg} ${resizeWindow} ${closeIconSvg}</div>
         </th>
@@ -521,6 +529,9 @@ async function createWindow() {
       ${getTableContent(info)}
     </tbody>
     </table>
+    <div class="candle-container">
+      <div class="candle"/>
+    </div>
     `;
 
     const tableDialog = document.createElement("div");
@@ -547,6 +558,10 @@ async function createWindow() {
     // Слушатель кнопки смены позиции окна
     const resizeWindowButton = document.querySelector(".resize-window");
     resizeWindowButton.addEventListener("click", changeTabPosition);
+
+    // Слушатель для свечи
+    const candleActivator = document.querySelector(".candle-activator");
+    candleActivator.addEventListener("click", showCandle);
   });
 
   // Анимация бабл-кнопки
