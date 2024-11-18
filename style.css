@@ -478,7 +478,6 @@ input:checked + .switch-slider:before {
   right: 0;
 }
 .window-button-container svg {
-  /* height: 100%; */
   width: 20px;
   display: block;
 }
@@ -489,9 +488,13 @@ input:checked + .switch-slider:before {
 }
 .resize-window {
   transform: rotate(90deg);
+  padding-right: 1px;
 }
 .table-dialog-right .resize-window  {
   transform: rotate(270deg);
+}
+.window-button-container .update-svg {
+  height: 17px;
 }
 
 .table-close-icon, .resize-window, .update-svg {
