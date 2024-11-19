@@ -395,19 +395,20 @@ async function createWindow() {
   // Функция для добавления свечи
   const showCandle = () => {
     const candle = document.querySelector(".candle-container");
-    candle.style.display = "flex";
+    candle.style.opacity = 1;
   };
 
   // Функция для удаления релиз-таблицы
   const closeReleaseTable = () => {
     const tab = document.querySelector(".table-dialog");
-    const tableCloseIcon = document.querySelector(".table-close-icon");
-    const resizeWindowButton = document.querySelector(".resize-window");
-    const candleActivator = document.querySelector(".candle-activator");
 
     if (tab) {
-      // Удаляем все слушатели событий для строк таблицы
       const tableRows = tab.querySelectorAll(".custom-table-row");
+      const tableCloseIcon = tab.querySelector(".table-close-icon");
+      const resizeWindowButton = tab.querySelector(".resize-window");
+      const candleActivator = tab.querySelector(".candle-activator");
+
+      // Удаляем все слушатели событий для строк таблицы
       tableRows.forEach((row) => {
         row.removeEventListener("click", handleRowClick); // Удаляем слушатель
       });
