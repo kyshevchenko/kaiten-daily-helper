@@ -394,8 +394,8 @@ async function createWindow() {
 
   // Функция для добавления свечи
   const showCandle = () => {
-    const candle = document.querySelector(".candle-container");
-    candle.style.opacity = 1;
+    const candle = document.querySelector(".candle");
+    candle.style.display = "block";
   };
 
   // Функция для удаления релиз-таблицы

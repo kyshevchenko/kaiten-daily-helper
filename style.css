@@ -510,13 +510,12 @@ input:checked + .switch-slider:before {
   position: sticky;
   height: 0;
   bottom: 0;
-  opacity: 0;
 }
 
 .candle {
+  display: none;
   background: url(https://assets.codepen.io/2015738/candle.png) no-repeat
     0px 0px;
-  display: block;
   width: 200px;
   height: 280px;
   animation: candle 6s steps(160) infinite;
