@@ -406,15 +406,16 @@ async function createWindow() {
       const tableRows = tab.querySelectorAll(".custom-table-row");
       const tableCloseIcon = tab.querySelector(".table-close-icon");
       const resizeWindowButton = tab.querySelector(".resize-window");
+      const updateReleaseButton = document.querySelectorAll(".update-svg");
       const candleActivator = tab.querySelector(".candle-activator");
 
       // Удаляем все слушатели событий для строк таблицы
       tableRows.forEach((row) => {
         row.removeEventListener("click", handleRowClick); // Удаляем слушатель
       });
-
       tableCloseIcon.removeEventListener("click", closeReleaseTable); // Удаляем слушатель иконки закрытия окна
       resizeWindowButton.removeEventListener("click", changeTabPosition); // Удаляем слушатель иконки изменения позиции окна
+      updateReleaseButton[1].removeEventListener("click", updateReleaseTable); // Удаляем слушатель кнопки Обновить
       candleActivator.removeEventListener("click", showCandle); // Удаляем слушатель для свечи
 
       document.body.removeChild(tab); // Удаляем само окно релиз-таблицы
@@ -424,11 +425,7 @@ async function createWindow() {
 
   // Функция для обновления релиз-таблицы
   const updateReleaseTable = () => {
-    const updateReleaseButton = document.querySelectorAll(".update-svg");
-    // Удаляем слушатель кнопки Обновить
-    updateReleaseButton[1].removeEventListener("click", updateReleaseTable);
-
-    closeReleaseTable(); // Удаляем окно релиз-таблицы и другие слушатели событий
+    closeReleaseTable(); // Удаляем окно релиз-таблицы
     buttonDisplayReleaseTable.click(); // Открываем окно снова
   };
 
@@ -465,11 +462,13 @@ async function createWindow() {
       (child) => child.tagName === "DIV"
     );
 
-    // Получаем все элементы <p> внутри второго дочернего <div> - это все имена тасок
+    // Получаем все элементы <p> внутри второго дочернего <div> (все имена тасок)
     const pElems = childDivs[1].querySelectorAll("p");
     const taskNames = Array.from(pElems);
+    const taskNamesText = taskNames.map((e) => e.textContent).join("\n");
+    const taskCount = taskNames.length;
 
-    // Получаем всю инфу по таскам
+    // Получаем всю остальную инфу по таскам
     const tasksInfo = Array.from(childDivs[2].children).filter(
       (child) => child.tagName === "DIV"
     );
@@ -498,10 +497,10 @@ async function createWindow() {
 
     //Функция для наполнения таблицы
     const getTableContent = (info) => {
-      let content = "";
+      let table = "";
 
       for (const i in info) {
-        content += `
+        table += `
         <tr class="custom-table-row" data-id="${info[i].ID}">
           <td>${info[i].name}</td>
           <td>${info[i].ID}</td>
@@ -510,7 +509,7 @@ async function createWindow() {
         </tr>
         `;
       }
-      return content;
+      return table;
     };
 
     // Создаем и наполняем таблицу
@@ -518,7 +517,7 @@ async function createWindow() {
     <table class="custom-table">
     <thead class="custom-table-head">
       <tr>
-        <th>Название задачи</th>
+        <th>Название задачи (${taskCount})${copySvg}</th>
         <th>ID</th>
         <th class="candle-activator">Статус</th>
         <th>Исполнитель
@@ -563,6 +562,12 @@ async function createWindow() {
     // Слушатель для свечи
     const candleActivator = document.querySelector(".candle-activator");
     candleActivator.addEventListener("click", showCandle);
+
+    // Слушатель для иконки копирования
+    const copyButton = document.querySelector(".copy-button");
+    copyButton.addEventListener("click", () => {
+      navigator.clipboard.writeText(taskNamesText);
+    });
   });
 
   // Анимация бабл-кнопки

@@ -459,12 +459,17 @@ input:checked + .switch-slider:before {
   position: sticky;
   top: 0;
 }
+.custom-table-head tr th {
+min-height: 30px;
+}
+.custom-table-head tr th:first-child {
+  display: flex;
+}
 
 /* Стили для корректного расположения икноки крестика и обновления */
 .custom-table-head tr th:last-child {
   display: flex;
   justify-content: space-between;
-  /* padding-right: 5px; */
   align-items: center;
   min-width: 140px; 
 }
@@ -497,8 +502,15 @@ input:checked + .switch-slider:before {
   height: 17px;
 }
 
-.table-close-icon, .resize-window, .update-svg {
+.table-close-icon, .resize-window, .update-svg, .copy-button {
   cursor: pointer;
+}
+
+.copy-button {
+  height: 18px;
+  transform: scale(-1, 1);
+  margin-left: 5px;
+  margin-top: 2px;
 }
 /* Стили для релиз-таблицы */
 
