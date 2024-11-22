@@ -474,7 +474,7 @@ async function createWindow() {
     );
 
     tasksInfo.splice(0, 6); // Удаляем первые 7 элементов для дальнейшей корректной работы
-    const info = {}; // сюда собираем всю инф
+    const info = {}; // хранение всей инф по таскам
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
@@ -494,6 +494,12 @@ async function createWindow() {
       tasksInfo.splice(0, 6);
       count++;
     }
+    const gitTaskList = taskNames
+      .map((e, i) => {
+        const id = info[i + 1].ID;
+        return `- [ABP-${id}](https://kaiten.x5.ru/space/3260/card/${id}) ${e.textContent}`;
+      })
+      .join("\n");
 
     //Функция для наполнения таблицы
     const getTableContent = (info) => {
@@ -518,7 +524,7 @@ async function createWindow() {
     <thead class="custom-table-head">
       <tr>
         <th>Название задачи (${taskCount})${copySvg}</th>
-        <th>ID</th>
+        <th class="id-column-header">ID</th>
         <th class="candle-activator">Статус</th>
         <th>Исполнитель
           <div class="window-button-container">${updateSvg} ${resizeWindow} ${closeIconSvg}</div>
@@ -567,6 +573,12 @@ async function createWindow() {
     const copyButton = document.querySelector(".copy-button");
     copyButton.addEventListener("click", () => {
       navigator.clipboard.writeText(taskNamesText);
+    });
+
+    // Слушатель столбца ID для копирования инф в гит
+    const idColumnHeader = document.querySelector(".id-column-header");
+    idColumnHeader.addEventListener("click", () => {
+      navigator.clipboard.writeText(gitTaskList);
     });
   });
 
