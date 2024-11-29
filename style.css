@@ -462,16 +462,16 @@ input:checked + .switch-slider:before {
 .custom-table-head tr th {
 min-height: 30px;
 }
-.custom-table-head tr th:first-child {
+.custom-table-head tr th:first-child,
+.custom-table-head tr th:last-child {
   display: flex;
+  align-items: center;
 }
 
 /* Стили для корректного расположения икноки крестика и обновления */
 .custom-table-head tr th:last-child {
-  display: flex;
+  min-width: 140px;
   justify-content: space-between;
-  align-items: center;
-  min-width: 140px; 
 }
 
 .window-button-container {
@@ -532,6 +532,11 @@ min-height: 30px;
   height: 280px;
   animation: candle 6s steps(160) infinite;
   z-index: 6;
+}
+
+.short-candle {
+  transform: scale(0.35);
+  transform-origin: bottom;
 }
 
 @keyframes candle {

@@ -544,9 +544,15 @@ async function createWindow() {
     const currentPositionClass = isCenterTabPosition
       ? centerPositionClass
       : rightPositionClass;
-
     tableDialog.className = `table-dialog ${currentPositionClass}`;
+
     tableDialog.innerHTML = customTable;
+
+    if (taskCount < 4) {
+      const candle = tableDialog.querySelector(".candle");
+      candle.classList.add("short-candle");
+    }
+
     document.body.appendChild(tableDialog); // Начинаем отображать окно
 
     // Cлушатель событий для каждой строки таблицы
