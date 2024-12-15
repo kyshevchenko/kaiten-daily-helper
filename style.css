@@ -42,6 +42,7 @@
 }
 .bottom-block {
   display: flex;
+  gap: 5px;
 }
 .bottom-buttons {
   display: flex;
@@ -81,7 +82,7 @@
   gap: 5px;
   position: absolute;
   height: 70px;
-  top: 10px;
+  top: 30px;
   right: -1px;
 }
 #form-create-list {
@@ -122,6 +123,7 @@
 
 .switch-container {
   display: flex;
+  position: relative;
   align-items: center;
   padding-top: 10px;
 }
@@ -221,7 +223,6 @@ input:checked + .switch-slider:before {
   -webkit-appearance: none;
   appearance: none;
   background-color: rgb(103, 174, 103);
-  /* rgb(103, 174, 103); */
   color: white;
   border-radius: 4px;
   border: none;
@@ -389,7 +390,7 @@ input:checked + .switch-slider:before {
 }
 .table-dialog-center {
   max-height: 73vh;
-  width: 1050px;
+  width: 1100px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -422,6 +423,12 @@ input:checked + .switch-slider:before {
   padding: 1px 8px;
   border-right: 1px solid #666;
   text-align: left;
+}
+tr td:first-child {
+  min-width: 500px;
+}
+.table-dialog-right .custom-table tbody tr td:first-child {
+  min-width: 390px;
 }
 
 .custom-table-row {
@@ -471,6 +478,7 @@ min-height: 30px;
 /* Стили для корректного расположения икноки крестика и обновления */
 .custom-table-head tr th:last-child {
   min-width: 140px;
+  gap: 10px;
   justify-content: space-between;
 }
 
@@ -510,7 +518,6 @@ min-height: 30px;
   height: 18px;
   transform: scale(-1, 1);
   margin-left: 5px;
-  margin-top: 2px;
 }
 /* Стили для релиз-таблицы */
 
@@ -548,3 +555,25 @@ min-height: 30px;
   }
 }
 /* Стили для свечи */
+
+/* Зимние новогодние стили */
+/* Стили для гирлянд пока скрыты */
+.christmas-lights {
+  display: none; 
+  position: absolute;
+  opacity: 0.6;
+  right: -85px;
+  bottom: 255px;
+  transform: scaleY(0.9) rotate(60deg);
+  transform-origin: bottom;
+  z-index: -1000;
+}
+
+.santa-hat {
+  position: absolute;
+  width: 50px;
+  right: 10px;
+  top: -1px;
+  transform: scaleX(-1) rotate(15deg);
+}
+/* Зимние новогодние стили */

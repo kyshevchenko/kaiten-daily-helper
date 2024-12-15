@@ -1,7 +1,27 @@
 let windowOpen = false;
 let dailyList = []; // Список для отображения кадого следующего спикера
 let speakersCount; // Количество спикеров для прогресс-бара // TODO убрать в функции
-let timer; // для корректной прокрутки к элементу с позиционированием вверху экрана
+let scrollTimer; // для корректной прокрутки к элементу с позиционированием вверху экрана
+
+const seasons = {
+  autumn: [9, 10, 11],
+  winter: [12, 1, 2],
+  sping: [3, 4, 5],
+  summer: [6, 7, 8],
+};
+
+const getSeason = () => {
+  const month = new Date().getMonth() + 1;
+  return Object.keys(seasons).find((s) => seasons[s].includes(month));
+};
+
+const isWinterTime = getSeason() === "winter";
+const seasonAccesories = {
+  fallenItem: isWinterTime ? snowflakeSvg : fallenLeafSvg,
+  christmasLights: isWinterTime ? christmasLightsSVG : "",
+  santaHatImg: isWinterTime ? santaHatSvg : "",
+};
+const { fallenItem, christmasLights, santaHatImg } = seasonAccesories;
 
 // список по умолчанию при первом запуске расширения
 let defaultList = [
@@ -100,8 +120,10 @@ async function createWindow() {
       </div>
       <p class="speaker" id="speaker"/></p>
       <br/>
-      ${fallenLeafSvg}
+      ${fallenItem}
       ${x5Svg}
+      ${christmasLights}
+      ${santaHatImg}
     `;
 
   document.body.appendChild(container);
@@ -115,6 +137,7 @@ async function createWindow() {
   const buttonFormCreateList = document.getElementById(
     "button-form-create-list"
   );
+  const santaHat = document.querySelector(".santa-hat");
 
   // Данные для релиз-таблицы
   const buttonDisplayReleaseTable = document.getElementById(
@@ -147,7 +170,7 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearTimeout(timer); // убираем таймаут скролла предыдущего клика
+    clearTimeout(scrollTimer); // убираем таймаут скролла предыдущего клика
 
     // TODO вынести это в генерацию списка по кнопке ОБНОВИТЬ
     const laneTitleElements = document.querySelectorAll(
@@ -191,7 +214,7 @@ async function createWindow() {
         block: "start",
       });
       // а затем прокручиваем к предыдущему элементу к позиции start, чтобы требуемый отображался корректно
-      timer = setTimeout(() => {
+      scrollTimer = setTimeout(() => {
         prevElem &&
           prevElem.scrollIntoView({
             behavior: "smooth",
@@ -336,6 +359,7 @@ async function createWindow() {
         // скрываем форму добавления нового списка и показываем снова кнопку добавления
         formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
         buttonFormCreateList.style.display = "block";
+        if (santaHat) santaHat.style.display = "block";
         list.innerHTML = generateHTMLList(sortedListNames);
 
         // слушатель label имен в новом списке //TODO убрать дублирование (вынести в функции все слушатели)
@@ -358,6 +382,7 @@ async function createWindow() {
     .addEventListener("click", () => {
       formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
       buttonFormCreateList.style.display = "block";
+      if (santaHat) santaHat.style.display = "block";
     });
 
   // Кнопка "+" показать/скрыть форму для создания нового списка
@@ -368,6 +393,7 @@ async function createWindow() {
         formCreateList.style.display === "none" ? "block" : "none";
       formCreateList.style.display = newDisplay;
       buttonFormCreateList.style.display = "none"; // скрываем саму кнопку
+      if (santaHat) santaHat.style.display = "none";
     });
 
   /* Вспомогательные функции для слушателей и удаления слушателей */ // TODO вынести все функции по релиз-таблице
@@ -663,7 +689,9 @@ function toggleWindow() {
     formCreateList = document.getElementById("form-create-list");
     formCreateList.style.display = "none";
     buttonFormCreateList = document.getElementById("button-form-create-list");
-    buttonFormCreateList.style.display = "block";
+    buttonFormCreateList.style.display = "block"; // TODO вынести в функцию, убрать дублирование
+    const santaHat = document.querySelector(".santa-hat");
+    if (santaHat) santaHat.style.display = "block";
   } else {
     createWindow();
     windowOpen = true;
@@ -680,9 +708,11 @@ function setLeafColor() {
     "#ff8e0c",
     "#ffd700 ",
   ];
-  const randomColor =
-    autumnColors[Math.floor(Math.random() * autumnColors.length)];
-  document.querySelector("#leafSvg .st0").style.fill = randomColor;
+  if (!isWinterTime) {
+    const randomColor =
+      autumnColors[Math.floor(Math.random() * autumnColors.length)];
+    document.querySelector("#leafSvg .st0").style.fill = randomColor;
+  }
 }
 
 function animateLeaf() {
@@ -694,7 +724,7 @@ function animateLeaf() {
 
   // Установка начального состояния
   const randomLeft = Math.random() * (80 - 10) + 10; // рандом положение листьев
-  const randomScale = 0.2 + Math.random() * 0.8; // рандом размер листьев
+  const randomScale = 0.1 + Math.random() * 0.2; // рандом размер для листьев был 0.2 + Math.random() * 0.8
   leaf.style.top = "-150px";
   leaf.style.left = `${randomLeft}%`;
   leaf.style.transition = "none"; // Убираем переход для сброса
