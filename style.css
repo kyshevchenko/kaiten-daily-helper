@@ -304,10 +304,14 @@ input:checked + .switch-slider:before {
 #button-form-create-list,
 #button-display-release-table,
 #open-boards-button {
-    cursor: pointer;
-  }
+  cursor: pointer;
+}
 
   /* Скрытая подсказка */
+.tooltip-container {
+  position: relative;
+}
+
 .tooltip-container .tooltip {
   visibility: hidden;
   width: 120px;
@@ -318,11 +322,11 @@ input:checked + .switch-slider:before {
   padding: 5px;
   border-radius: 5px;
 
-  /* Позиционирование вручную относительно .tooltip-container // TODO изменить */
+  /* Позиционирование относительно .tooltip-container */
   position: absolute;
   z-index: 1;
   right: 100%;
-  top: 10%;
+  top: -12px;
   transform: translateX(-10px);
   opacity: 0;
   transition: opacity 0.3s;
@@ -333,7 +337,6 @@ input:checked + .switch-slider:before {
     content: "";
     position: absolute;
     left: 100%;
-    top: 50%;
     margin-top: -5px;
     border-width: 5px;
     border-style: solid;
