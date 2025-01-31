@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "Kaiten daily helper",
-    "version": "1.5.1",
+    "name": "Kaiten daily helper [test]",
+    "version": "1.5.2",
     "description": "Автоматическая навигация в Kaiten во время встреч.",
     "content_scripts": [
       {

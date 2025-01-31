@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.label-name, #radio-container, #speaker, .switch-label {
+.label-name, #radio-container, #speaker-field, .switch-label {
   background-color: white;
   border-radius: 3px;
   color: black;
@@ -29,7 +29,7 @@
   font-size: 0.90em;
 }
 
-#speaker {
+#speaker-field {
   height: 12px;
   margin-top: 0;
   padding-bottom: 5px;
@@ -110,11 +110,22 @@
   padding-top: 5px;
 }
 
-.opened-boards {
+.opened-boards-icon {
   transform: rotate(90deg);
 }
-.collapsed-boards {
+.collapsed-boards-icon {
   transform: rotate(270deg);
+}
+.open-boards-button.black-color-icon {
+  stroke: black;
+  fill: black;
+}
+.open-boards-button.gray-color-icon {
+  stroke: gray;
+  fill: gray;
+}
+.open-boards-button.gray-color-icon circle{
+  stroke: gray;
 }
 
 /* Стили для радио-кнопок */
