@@ -1,12 +1,12 @@
 {
     "manifest_version": 3,
     "name": "Kaiten daily helper [test]",
-    "version": "1.5.2",
+    "version": "1.5.3",
     "description": "Автоматическая навигация в Kaiten во время встреч.",
     "content_scripts": [
       {
         "matches": ["*://kaiten.x5.ru/*"],
-        "js": ["images.js", "script.js"],
+        "js": ["images.js", "utils.js", "script.js"],
         "css": ["style.css"]
       }
     ],

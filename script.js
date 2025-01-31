@@ -141,21 +141,16 @@ async function createWindow() {
   const nextNameButton = document.getElementById("next-name");
   nextNameButton.disabled = true;
   const formCreateList = document.getElementById("form-create-list"); // Форма для создания нового списка
-  formCreateList.style.display = "none"; // TODO заменить на классы, убрать дублирование
   const openCollapseBoardsButton =
     document.getElementById("open-boards-button"); // Кнопка для разворачивания/сворачивания досок
-  const buttonFormCreateList = document.getElementById(
-    "button-form-create-list"
-  );
+  const sideMenu = document.querySelector(".side-menu");
   const santaHat = document.querySelector(".santa-hat");
+  toogleDisplayingElem(sideMenu, "flex");
 
   // Данные для релиз-таблицы
   const buttonDisplayReleaseTable = document.getElementById(
     "button-display-release-table"
   );
-  let isCenterTabPosition = true;
-  const centerPositionClass = "table-dialog-center";
-  const rightPositionClass = "table-dialog-right";
 
   // Переменные прогресс-бара
   const circle = document.querySelector(".progress-bar-circle");
@@ -323,15 +318,13 @@ async function createWindow() {
     scrollToText(dailyList[0]);
 
     // Обновление списка спикеров
-    if (dailyList.length > 0) {
-      const isLastSpeaker = dailyList.length === 1;
-      const nextSpeaker = isLastSpeaker
-        ? `${dailyList[0]}\n(это заключительный спикер)`
-        : dailyList[0];
-      nextNameButton.disabled = isLastSpeaker;
-      changeSpeakerField(nextSpeaker, "black");
-      dailyList.shift();
-    }
+    const isLastSpeaker = dailyList.length === 1;
+    const nextSpeaker = isLastSpeaker
+      ? `${dailyList[0]}\n(это заключительный спикер)`
+      : dailyList[0];
+    nextNameButton.disabled = isLastSpeaker;
+    changeSpeakerField(nextSpeaker, "black");
+    dailyList.shift();
 
     animateLeaf(); // Включаем падающий лист
   });
@@ -357,9 +350,9 @@ async function createWindow() {
       }
 
       // скрываем форму добавления нового списка и показываем снова кнопку добавления
-      formCreateList.style.display = "none"; // TODO вынести в функцию, убрать дублирование
-      buttonFormCreateList.style.display = "block";
-      if (santaHat) santaHat.style.display = "block";
+      toogleDisplayingElem(formCreateList);
+      toogleDisplayingElem(sideMenu, "flex");
+      if (santaHat) toogleDisplayingElem(santaHat);
       list.innerHTML = generateHTMLList(sortedListNames);
 
       // слушатель label имен в новом списке //TODO убрать дублирование (вынести в функции все слушатели)
@@ -376,20 +369,18 @@ async function createWindow() {
   document
     .getElementById("button-cancel-own-list")
     .addEventListener("click", () => {
-      formCreateList.style.display = "none"; // TODO вынести в функцию и заменить на классы, убрать дублирование
-      buttonFormCreateList.style.display = "block";
-      if (santaHat) santaHat.style.display = "block"; // TODO refactor it
+      toogleDisplayingElem(formCreateList);
+      toogleDisplayingElem(sideMenu, "flex");
+      if (santaHat) toogleDisplayingElem(santaHat, "block");
     });
 
-  // Кнопка "+" показать/скрыть форму для создания нового списка
+  // Кнопка "+" показать форму для создания нового списка
   document
     .getElementById("button-form-create-list")
     .addEventListener("click", () => {
-      const newDisplay =
-        formCreateList.style.display === "none" ? "block" : "none";
-      formCreateList.style.display = newDisplay;
-      buttonFormCreateList.style.display = "none"; // скрываем саму кнопку
-      if (santaHat) santaHat.style.display = "none";
+      toogleDisplayingElem(formCreateList, 'block');
+      toogleDisplayingElem(sideMenu, "none");
+      if (santaHat) toogleDisplayingElem(santaHat, "none");
     });
 
   /* Вспомогательные функции для слушателей и удаления слушателей */
@@ -405,19 +396,14 @@ async function createWindow() {
     const tab = document.querySelector(".table-dialog");
 
     // Меняем классы и переменную для положения таблицы
-    tab.classList.add(
-      isCenterTabPosition ? rightPositionClass : centerPositionClass
-    );
-    tab.classList.remove(
-      isCenterTabPosition ? centerPositionClass : rightPositionClass
-    );
-    isCenterTabPosition = !isCenterTabPosition;
+    tab.classList.toggle("table-dialog-center");
+    tab.classList.toggle("table-dialog-right");
   };
 
   // Функция для добавления свечи
   const showCandle = () => {
     const candle = document.querySelector(".candle");
-    candle.style.display = "block";
+    toogleDisplayingElem(candle, "block");
   };
 
   // Функция для удаления релиз-таблицы
@@ -564,11 +550,7 @@ async function createWindow() {
     `;
 
     const tableDialog = document.createElement("div");
-    const currentPositionClass = isCenterTabPosition
-      ? centerPositionClass
-      : rightPositionClass;
-    tableDialog.className = `table-dialog ${currentPositionClass}`;
-
+    tableDialog.className = `table-dialog table-dialog-center`;
     tableDialog.innerHTML = customTable;
 
     if (taskCount < 4) {
@@ -670,7 +652,6 @@ async function createWindow() {
           block: "start",
         });
 
-        // Раздизейбл кнопок раскрытия досок, генерации списка, следующего спикера
         toogleCollapseButton(
           "releaseButton",
           isNextNameButtonActive,
@@ -686,12 +667,6 @@ async function createWindow() {
       );
       const isNextNameButtonActive = nextNameButton.disabled === false;
 
-      toogleCollapseButton(
-        "pressButton",
-        isNextNameButtonActive,
-        openBoardsSVG
-      );
-
       const isBoardsCollapsed = openBoardsSVG.classList.contains(
         "collapsed-boards-icon"
       );
@@ -703,6 +678,12 @@ async function createWindow() {
         console.log("Kaiten daily helper: no boards found.");
         return;
       }
+
+      toogleCollapseButton(
+        "pressButton",
+        isNextNameButtonActive,
+        openBoardsSVG
+      );
 
       for (const board of allBoards) {
         const allLanesOnBoard = board.querySelectorAll('div[data-test="lane"]');
@@ -769,17 +750,17 @@ function saveListToStorage(newList) {
 function toggleWindow() {
   const container = document.getElementById("extension-container");
   if (container) {
-    const newDisplay = container.style.display === "none" ? "block" : "none";
-    container.style.display = newDisplay;
-    windowOpen = newDisplay === "block";
+    windowOpen = toogleDisplayingElem(container);
 
     //скрываем форму создания нового списка и показываем кнопку
-    formCreateList = document.getElementById("form-create-list");
-    formCreateList.style.display = "none";
-    buttonFormCreateList = document.getElementById("button-form-create-list");
-    buttonFormCreateList.style.display = "block"; // TODO вынести в функцию, убрать дублирование
+    const formCreateList = document.getElementById("form-create-list");
+    const sideMenu = document.querySelector(".side-menu");
     const santaHat = document.querySelector(".santa-hat");
-    if (santaHat) santaHat.style.display = "block";
+    toogleDisplayingElem(formCreateList, "none");
+    toogleDisplayingElem(sideMenu, "flex");
+    if (santaHat) toogleDisplayingElem(santaHat, "block");
+
+    return;
   } else {
     createWindow();
     windowOpen = true;
@@ -826,15 +807,6 @@ function animateLeaf() {
       leaf.style.top = "120%"; // Конечное значение для анимации
     });
   });
-
-  // Запуск анимации снова при завершении // - отключен
-  // leaf.addEventListener(
-  //   "transitionend",
-  //   () => {
-  //     animateLeaf();
-  //   },
-  //   { once: true }
-  // );
 }
 // функции падающего листа для осени
 
