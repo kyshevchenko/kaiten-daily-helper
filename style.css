@@ -216,6 +216,20 @@ input:checked + .switch-slider:before {
   padding-left: 4px;
 }
 
+.update-svg.loader-effect {
+  animation: rotate 2s linear infinite;
+  transform-origin: 62% 53%;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* падающий лист */
 .leaf {
   position: absolute;

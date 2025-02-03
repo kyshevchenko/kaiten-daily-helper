@@ -3,20 +3,6 @@ let dailyList = []; // Список для отображения кадого �
 let speakersCount; // Количество спикеров для прогресс-бара // TODO убрать в функции
 let scrollTimer; // для корректной прокрутки к элементу с позиционированием вверху экрана
 
-const seasonsMonths = {
-  autumn: [9, 10, 11],
-  winter: [12, 1, 2],
-  sping: [3, 4, 5],
-  summer: [6, 7, 8],
-};
-
-const getSeason = () => {
-  const month = new Date().getMonth() + 1;
-  return Object.keys(seasonsMonths).find((s) =>
-    seasonsMonths[s].includes(month)
-  );
-};
-
 const isWinterTime = getSeason() === "winter";
 const seasonAccesories = {
   fallenItem: isWinterTime ? snowflakeSvg : fallenLeafSvg,
@@ -139,12 +125,12 @@ async function createWindow() {
   const nextSpeakerField = document.getElementById("speaker-field");
   const generateNewListButton = document.getElementById("start-button");
   const nextNameButton = document.getElementById("next-name");
-  nextNameButton.disabled = true;
   const formCreateList = document.getElementById("form-create-list"); // Форма для создания нового списка
   const openCollapseBoardsButton =
     document.getElementById("open-boards-button"); // Кнопка для разворачивания/сворачивания досок
   const sideMenu = document.querySelector(".side-menu");
   const santaHat = document.querySelector(".santa-hat");
+  toggleDisableButton(nextNameButton, true);
   toogleDisplayingElem(sideMenu, "flex");
 
   // Данные для релиз-таблицы
@@ -250,6 +236,11 @@ async function createWindow() {
 
   // Функция для генерации списка (обычного и рандомного)
   function generateList() {
+    toggleDisableButton(generateNewListButton, true);
+    toggleDisableButton(nextNameButton, true);
+    const loaderSvg = generateNewListButton.querySelector("svg");
+    loaderSvg.classList.toggle("loader-effect");
+    changeSpeakerField("");
     const namesCheckboxes = document.querySelectorAll(".checkbox-name");
     dailyList = [];
 
@@ -266,17 +257,22 @@ async function createWindow() {
       document.querySelector(".switch-checkbox").checked === true;
     // перемешиваем список, если isRandomMode
     if (isRandomMode) shuffleArray(dailyList);
-    const updatetListMessage = `Список обновлен.\n(${
-      isRandomMode ? "рандомный" : "последовательный"
-    } порядок)`;
 
-    changeSpeakerField(updatetListMessage, "rgba(128, 128, 128, 0.95)");
+    openBoards(); // Раскрываем доски, если свернуты
 
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
 
     if (laneTitleElements.length) {
+      const allLanes = document.querySelectorAll('div[data-test="lane"]');
+      // Проверяем свернуты ли доски и разворачиваем их // TODO выделить в функцию, убрать дублирование // TODO добавить и разворачивание досок
+      for (const lane of allLanes) {
+        const columns = lane.querySelectorAll(".hover_container");
+
+        if (!columns.length) uncollapseCurrentLane(lane);
+      }
+
       // ищем все доски согласно отмеченному списку спикеров // TODO добавить работу и с досками, а не только с swim-lannes
       for (const name of dailyList) {
         const matchingElements = Array.from(laneTitleElements).filter(
@@ -292,13 +288,24 @@ async function createWindow() {
       }
     } else {
       console.log("Kaiten daily helper: Kaiten board not found");
+      changeSpeakerField("Раскройте доски.\nНе все имена найдены.");
 
       return;
     }
 
-    const firstLaneElem = laneTitleElements[0];
-    scrollToText(firstLaneElem.textContent.trim());
-    nextNameButton.disabled = false;
+    setTimeout(() => {
+      const firstLaneElem = laneTitleElements[0];
+      scrollToText(firstLaneElem.textContent.trim());
+      loaderSvg.classList.toggle("loader-effect");
+      toggleDisableButton(nextNameButton, false);
+      toggleDisableButton(generateNewListButton, false);
+
+      const updatetListMessage = `Список обновлен.\n(${
+        isRandomMode ? "рандомный" : "последовательный"
+      } порядок)`;
+      changeSpeakerField(updatetListMessage, "rgba(128, 128, 128, 0.95)");
+    }, 0);
+
   }
 
   // Слушатель label имен
@@ -322,7 +329,7 @@ async function createWindow() {
     const nextSpeaker = isLastSpeaker
       ? `${dailyList[0]}\n(это заключительный спикер)`
       : dailyList[0];
-    nextNameButton.disabled = isLastSpeaker;
+    toggleDisableButton(nextNameButton, isLastSpeaker);
     changeSpeakerField(nextSpeaker, "black");
     dailyList.shift();
 
@@ -378,7 +385,7 @@ async function createWindow() {
   document
     .getElementById("button-form-create-list")
     .addEventListener("click", () => {
-      toogleDisplayingElem(formCreateList, 'block');
+      toogleDisplayingElem(formCreateList, "block");
       toogleDisplayingElem(sideMenu, "none");
       if (santaHat) toogleDisplayingElem(santaHat, "none");
     });
@@ -603,9 +610,10 @@ async function createWindow() {
     ) => {
       const isButtonPressed = operationMoment === "pressButton";
 
-      openCollapseBoardsButton.disabled = isButtonPressed;
-      generateNewListButton.disabled = isButtonPressed;
-      if (isNextNameButtonActive) nextNameButton.disabled = isButtonPressed;
+      toggleDisableButton(openCollapseBoardsButton, isButtonPressed);
+      toggleDisableButton(generateNewListButton, isButtonPressed);
+      if (isNextNameButtonActive)
+        toggleDisableButton(nextNameButton, isButtonPressed);
 
       openBoardsSVG.classList.toggle("black-color-icon");
       openBoardsSVG.classList.toggle("gray-color-icon");
@@ -629,17 +637,10 @@ async function createWindow() {
         const columns = lane.querySelectorAll(".hover_container");
 
         if (
-          (!columns.length && !isBoardsCollapsed) ||
-          (columns.length && isBoardsCollapsed)
-        ) {
-          const collapseLaneButton = lane.querySelector(
-            '[data-test="title-collapse-button"]'
-          );
-          if (collapseLaneButton) {
-            const openLane = () => collapseLaneButton.click();
-            setTimeout(openLane, 0); // запускаем в setTimeout чтобы доски раскрывались без остановки других процессов
-          }
-        }
+          (!columns.length && isBoardsCollapsed) ||
+          (columns.length && !isBoardsCollapsed)
+        )
+          uncollapseCurrentLane(lane);
       }
 
       // Прокручиваем на самый верх страницы после раскрытия всех досок
@@ -661,7 +662,7 @@ async function createWindow() {
     };
 
     // Функция раскрытия досок, если они свернуты
-    const openBoards = () => {
+    const uncollapseBoards = (openBoards) => {
       const openBoardsSVG = openCollapseBoardsButton.querySelector(
         ".open-boards-button"
       );
@@ -670,14 +671,6 @@ async function createWindow() {
       const isBoardsCollapsed = openBoardsSVG.classList.contains(
         "collapsed-boards-icon"
       );
-      const allBoards = document.querySelectorAll(
-        'div[data-test="board-container"]'
-      );
-
-      if (!allBoards.length) {
-        console.log("Kaiten daily helper: no boards found.");
-        return;
-      }
 
       toogleCollapseButton(
         "pressButton",
@@ -685,66 +678,13 @@ async function createWindow() {
         openBoardsSVG
       );
 
-      for (const board of allBoards) {
-        const allLanesOnBoard = board.querySelectorAll('div[data-test="lane"]');
-
-        if (!allLanesOnBoard.length) {
-          const collapseBoardButton = board.querySelector(
-            '[data-test="collapse-board-button"]'
-          );
-          if (collapseBoardButton) {
-            collapseBoardButton.click();
-          }
-        }
-      }
+      openBoards();
 
       openLanes(isBoardsCollapsed, isNextNameButtonActive, openBoardsSVG);
     };
 
-    openBoards();
+    uncollapseBoards(openBoards);
   });
-}
-
-// сохранение своего списка в хранлище Хрома
-function saveListToStorage(newList) {
-  // TODO добавить и работу с досками (поиск в названии досок, а не только в swim-lane элементах) + добавить логику для !laneTitleElements.length => return
-  // находим все swim-lane
-  const laneTitleElements = document.querySelectorAll(
-    'div[role="button"][data-test="lane-title-text"]'
-  );
-
-  // Если swim-lane элементы не найдены на странице, пишем в консоль
-  if (!laneTitleElements.length)
-    console.log("Kaiten daily helper: Kaiten board not found.");
-
-  const namesIndexes = {};
-
-  // Ищем выбранные имена на досках в Кайтене
-  for (const name of newList) {
-    const matchingElements = Array.from(laneTitleElements).filter((element) => {
-      return element.textContent.trim() === name;
-    });
-
-    const targetIndex = Array.from(laneTitleElements).findIndex(
-      (e) => e === matchingElements[0]
-    );
-
-    namesIndexes[name] = targetIndex;
-    if (targetIndex === -1) return false; // возвращаем false, если хотя бы одно имя на доске в swim-lanes не найдено
-  }
-
-  // сортируем новый список
-  const sortedListArray = Object.entries(namesIndexes).sort(
-    (a, b) => a[1] - b[1]
-  );
-  const sortedListNamesIndex = Object.fromEntries(sortedListArray);
-  const sortedListNames = Object.keys(sortedListNamesIndex);
-
-  // сохраняем в хранилище хрома
-  chrome.storage.sync.set({ ownList: sortedListNames }, () => {
-    console.log("Kaiten daily helper: new list saved! ", newList);
-  });
-  return sortedListNames;
 }
 
 function toggleWindow() {
@@ -766,49 +706,6 @@ function toggleWindow() {
     windowOpen = true;
   }
 }
-
-// функции падающего листа для осени
-function setLeafColor() {
-  const autumnColors = [
-    "#fe6905",
-    "#ae700b",
-    "#a22a29",
-    "#da2f03",
-    "#ff8e0c",
-    "#ffd700 ",
-  ];
-  if (!isWinterTime) {
-    const randomColor =
-      autumnColors[Math.floor(Math.random() * autumnColors.length)];
-    document.querySelector("#leafSvg .st0").style.fill = randomColor;
-  }
-}
-
-function animateLeaf() {
-  const leaf = document.querySelector(".leaf");
-
-  // Установка случайного цвета и начального положения
-  setLeafColor();
-  leaf.style.transform = `rotate(${Math.random() * 360}deg)`;
-
-  // Установка начального состояния
-  const randomLeft = Math.random() * (80 - 10) + 10; // рандом положение листьев
-  const randomScale = 0.1 + Math.random() * 0.2; // рандом размер для листьев был 0.2 + Math.random() * 0.8
-  leaf.style.top = "-150px";
-  leaf.style.left = `${randomLeft}%`;
-  leaf.style.transition = "none"; // Убираем переход для сброса
-  leaf.style.opacity = "0.5";
-  leaf.style.transform += ` scale(${randomScale})`;
-
-  // Начальная анимация
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      leaf.style.transition = "top 15s linear, transform 5s linear";
-      leaf.style.top = "120%"; // Конечное значение для анимации
-    });
-  });
-}
-// функции падающего листа для осени
 
 // слушатель фонового обработчика backgrounds.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
