@@ -128,6 +128,8 @@ async function createWindow() {
   const formCreateList = document.getElementById("form-create-list"); // Форма для создания нового списка
   const openCollapseBoardsButton =
     document.getElementById("open-boards-button"); // Кнопка для разворачивания/сворачивания досок
+  const openBoardsSVG =
+    openCollapseBoardsButton.querySelector(".open-boards-svg");
   const sideMenu = document.querySelector(".side-menu");
   const santaHat = document.querySelector(".santa-hat");
   toggleDisableButton(nextNameButton, true);
@@ -169,55 +171,61 @@ async function createWindow() {
   function scrollToText(name) {
     clearTimeout(scrollTimer); // убираем таймаут скролла предыдущего клика
 
+    // Находим все названия досок
+    const boardTitleElements = document.querySelectorAll(
+      'div[role="presentation"][data-test="board-title"]'
+    );
+
     // TODO необходимо будет объединить с логикой скролла и по названиям досок (аналогично в saveListToStorage())
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
 
-    // Отфильтровываем, оставляем все laneTitleElements, содержащие имена спикеров
-    const matchingElements = Array.from(laneTitleElements).filter(
+    const allBoardsAndLanes = [...boardTitleElements, ...laneTitleElements];
+
+    // Отфильтровываем, оставляем все элементы с именами спикеров
+    const matchingElements = allBoardsAndLanes.filter(
       (e) => e.textContent.trim() === name
     );
 
     if (matchingElements.length > 0) {
-      const allElements = Array.from(laneTitleElements);
-
-      const targetIndex = Array.from(laneTitleElements).findIndex(
-        (e) => e === matchingElements[0]
-      );
-
       // находим все доски на странице и элементы с именами на ней
       const boardContainer = matchingElements[0].closest(
         '[data-test="board-container"]'
       );
-      const allContainerLines = boardContainer.querySelectorAll(
-        '[data-test="lane-title-text"]'
-      );
-      // доп прокрутка на самый верх доски, если это первый элемент на ней
-      if (allContainerLines[0].textContent.trim() === name) {
+
+      const isBoardTitleElem =
+        matchingElements[0].getAttribute("data-test") === "board-title";
+
+      const laneContainer = matchingElements[0].closest('[data-test="lane"]');
+
+      if (isBoardTitleElem) {
         boardContainer.scrollIntoView({
+          // TODO вынести в функцию, убрать дублирование
           behavior: "smooth",
           block: "start",
         });
+
         return;
+      } else if (laneContainer) {
+        laneContainer.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+        setTimeout(() => {
+          // Прокручиваем контейнер немного вниз
+          const scrollContainer = laneContainer.parentElement;
+          scrollContainer.style.overflow = "auto";
+          scrollContainer.scrollTop += 100;
+        }, 500);
+        return;
+      } else {
+        matchingElements[0].scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       }
-
-      /* Если это не первый элемент на доске, выполняем другую логику скролла */
-      const prevElem = allElements[targetIndex - 1]; // Определяем предыдущий (swim-lane) элемент, чтобы впоследствии осуществлять прокрутку до него
-
-      // Сначала рокручиваем до требуемого элемента к позиции start
-      matchingElements[0].scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      // а затем прокручиваем к предыдущему элементу к позиции start, чтобы требуемый отображался корректно
-      scrollTimer = setTimeout(() => {
-        prevElem &&
-          prevElem.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-      }, 700);
     } else {
       name &&
         console.log(`Kaiten daily helper: Speaker ${name} not found on board`);
@@ -239,10 +247,11 @@ async function createWindow() {
     toggleDisableButton(generateNewListButton, true);
     toggleDisableButton(nextNameButton, true);
     const loaderSvg = generateNewListButton.querySelector("svg");
-    loaderSvg.classList.toggle("loader-effect");
+    toggleClasses(loaderSvg, ["loader-effect"]);
     changeSpeakerField("");
     const namesCheckboxes = document.querySelectorAll(".checkbox-name");
     dailyList = [];
+    let hasKaitenElems = true;
 
     // Добавляем в список всех спикеров с чекбоксами
     namesCheckboxes.forEach((checkbox) => {
@@ -260,52 +269,61 @@ async function createWindow() {
 
     openBoards(); // Раскрываем доски, если свернуты
 
+    const boardTitleElements = document.querySelectorAll(
+      'div[role="presentation"][data-test="board-title"]'
+    );
+
     const laneTitleElements = document.querySelectorAll(
       'div[role="button"][data-test="lane-title-text"]'
     );
 
     if (laneTitleElements.length) {
       const allLanes = document.querySelectorAll('div[data-test="lane"]');
-      // Проверяем свернуты ли доски и разворачиваем их // TODO выделить в функцию, убрать дублирование // TODO добавить и разворачивание досок
+
+      // Проверяем свернуты ли swim-lanes и разворачиваем их // TODO выделить в функцию, убрать дублирование
       for (const lane of allLanes) {
         const columns = lane.querySelectorAll(".hover_container");
-
         if (!columns.length) uncollapseCurrentLane(lane);
       }
 
-      // ищем все доски согласно отмеченному списку спикеров // TODO добавить работу и с досками, а не только с swim-lannes
+      // ищем все доски согласно отмеченному списку спикеров
       for (const name of dailyList) {
-        const matchingElements = Array.from(laneTitleElements).filter(
+        const matchingElements = [...boardTitleElements, ...laneTitleElements].filter(
           (element) => {
             return element.textContent.trim() === name;
           }
         );
-        if (matchingElements.length === 0) {
-          changeSpeakerField("Раскройте доски.\nНе все имена найдены.");
-
-          return;
+        if (!matchingElements.length) {
+          changeSpeakerField("Раскройте доски или смените страницу. Не все имена найдены.");
+          hasKaitenElems = false;
         }
       }
     } else {
       console.log("Kaiten daily helper: Kaiten board not found");
-      changeSpeakerField("Раскройте доски.\nНе все имена найдены.");
-
-      return;
+      changeSpeakerField("Раскройте доски или смените страницу. Не все имена найдены.");
+      hasKaitenElems = false;
     }
+
+    const updatetListMessage = `Список обновлен.\n(${
+      isRandomMode ? "рандомный" : "последовательный"
+    } порядок)`;
 
     setTimeout(() => {
       const firstLaneElem = laneTitleElements[0];
       scrollToText(firstLaneElem.textContent.trim());
-      loaderSvg.classList.toggle("loader-effect");
+      toggleClasses(loaderSvg, ["loader-effect"]);
       toggleDisableButton(nextNameButton, false);
       toggleDisableButton(generateNewListButton, false);
+      if (hasKaitenElems)
+        changeSpeakerField(updatetListMessage, "rgba(128, 128, 128, 0.95)");
 
-      const updatetListMessage = `Список обновлен.\n(${
-        isRandomMode ? "рандомный" : "последовательный"
-      } порядок)`;
-      changeSpeakerField(updatetListMessage, "rgba(128, 128, 128, 0.95)");
+      if (openBoardsSVG.classList.contains("collapsed-boards-icon")) {
+        toggleClasses(openBoardsSVG, [
+          "collapsed-boards-icon",
+          "opened-boards-icon",
+        ]);
+      }
     }, 0);
-
   }
 
   // Слушатель label имен
@@ -346,6 +364,7 @@ async function createWindow() {
         .replace(/\n/g, "")
         .split(",")
         .map((e) => e.trim());
+
       const sortedListNames = saveListToStorage(namesArray);
 
       if (!sortedListNames) {
@@ -403,8 +422,7 @@ async function createWindow() {
     const tab = document.querySelector(".table-dialog");
 
     // Меняем классы и переменную для положения таблицы
-    tab.classList.toggle("table-dialog-center");
-    tab.classList.toggle("table-dialog-right");
+    toggleClasses(tab, ["table-dialog-center", "table-dialog-right"]);
   };
 
   // Функция для добавления свечи
@@ -615,13 +633,14 @@ async function createWindow() {
       if (isNextNameButtonActive)
         toggleDisableButton(nextNameButton, isButtonPressed);
 
-      openBoardsSVG.classList.toggle("black-color-icon");
-      openBoardsSVG.classList.toggle("gray-color-icon");
+      toggleClasses(openBoardsSVG, ["black-color-icon", "gray-color-icon"]);
 
       // Переворачиваем иконку во время нажатия кнопки
       if (isButtonPressed) {
-        openBoardsSVG.classList.toggle("collapsed-boards-icon");
-        openBoardsSVG.classList.toggle("opened-boards-icon");
+        toggleClasses(openBoardsSVG, [
+          "collapsed-boards-icon",
+          "opened-boards-icon",
+        ]);
       }
     };
 
@@ -663,9 +682,6 @@ async function createWindow() {
 
     // Функция раскрытия досок, если они свернуты
     const uncollapseBoards = (openBoards) => {
-      const openBoardsSVG = openCollapseBoardsButton.querySelector(
-        ".open-boards-button"
-      );
       const isNextNameButtonActive = nextNameButton.disabled === false;
 
       const isBoardsCollapsed = openBoardsSVG.classList.contains(

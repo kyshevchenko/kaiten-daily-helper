@@ -195,7 +195,7 @@ const santaHatSvg = `
 `;
 
 const openBoardsSvg = `
-<svg class="open-boards-button collapsed-boards-icon black-color-icon" width="25" height="25" viewBox="0 0 64 64">
+<svg class="open-boards-svg collapsed-boards-icon black-color-icon" width="25" height="25" viewBox="0 0 64 64">
   <g>
     <!-- Жирный круг -->
     <circle cx="32" cy="32" r="28" stroke="#000000" stroke-width="6" fill="none"/>

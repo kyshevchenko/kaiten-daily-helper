@@ -116,15 +116,15 @@
 .collapsed-boards-icon {
   transform: rotate(270deg);
 }
-.open-boards-button.black-color-icon {
+.open-boards-svg.black-color-icon {
   stroke: black;
   fill: black;
 }
-.open-boards-button.gray-color-icon {
+.open-boards-svg.gray-color-icon {
   stroke: gray;
   fill: gray;
 }
-.open-boards-button.gray-color-icon circle{
+.open-boards-svg.gray-color-icon circle{
   stroke: gray;
 }
 

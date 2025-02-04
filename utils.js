@@ -5,15 +5,15 @@ const seasonsMonths = {
   summer: [6, 7, 8],
 };
 
-const toggleDisableButton = (button, option) => {
-  button.disabled = option;
-}
-
 const getSeason = () => {
   const month = new Date().getMonth() + 1;
   return Object.keys(seasonsMonths).find((s) =>
     seasonsMonths[s].includes(month)
   );
+};
+
+const toggleDisableButton = (button, option) => {
+  button.disabled = option;
 };
 
 const toogleDisplayingElem = (elem, option) => {
@@ -29,32 +29,46 @@ const toogleDisplayingElem = (elem, option) => {
   return isElemHide;
 };
 
+const toggleClasses = (elem, classesArray) => {
+  classesArray.forEach((e) => elem.classList.toggle(e));
+};
+
 // сохранение своего списка в хранлище Хрома
 function saveListToStorage(newList) {
   // TODO добавить и работу с досками (поиск в названии досок, а не только в swim-lane элементах) + добавить логику для !laneTitleElements.length => return
+
+  // Находим все названия досок
+  const boardTitleElements = document.querySelectorAll(
+    'div[role="presentation"][data-test="board-title"]'
+  );
+
   // находим все swim-lane
   const laneTitleElements = document.querySelectorAll(
     'div[role="button"][data-test="lane-title-text"]'
   );
 
+  const allBoardsAndLanes = [...boardTitleElements, ...laneTitleElements];
+
   // Если swim-lane элементы не найдены на странице, пишем в консоль
-  if (!laneTitleElements.length)
+  if (!allBoardsAndLanes.length) {
     console.log("Kaiten daily helper: Kaiten board not found.");
+    return false;
+  }
 
   const namesIndexes = {};
 
   // Ищем выбранные имена на досках в Кайтене
   for (const name of newList) {
-    const matchingElements = Array.from(laneTitleElements).filter((element) => {
+    const matchingElements = allBoardsAndLanes.filter((element) => {
       return element.textContent.trim() === name;
     });
 
-    const targetIndex = Array.from(laneTitleElements).findIndex(
+    const targetIndex = allBoardsAndLanes.findIndex(
       (e) => e === matchingElements[0]
     );
 
+    if (targetIndex === -1) return false; // возвращаем false, если хотя бы одно имя на доске на досках и swim-lanes не найдено
     namesIndexes[name] = targetIndex;
-    if (targetIndex === -1) return false; // возвращаем false, если хотя бы одно имя на доске в swim-lanes не найдено
   }
 
   // сортируем новый список
@@ -69,9 +83,9 @@ function saveListToStorage(newList) {
     console.log("Kaiten daily helper: new list saved! ", newList);
   });
   return sortedListNames;
-};
+}
 
-// Функция для разворачивания досок 
+// Функция для разворачивания досок
 function openBoards() {
   const allBoards = document.querySelectorAll(
     'div[data-test="board-container"]'
@@ -94,7 +108,7 @@ function openBoards() {
       }
     }
   }
-};
+}
 
 // Функция для разворачивания одной выбранной swim-lane
 function uncollapseCurrentLane(lane) {
@@ -105,7 +119,7 @@ function uncollapseCurrentLane(lane) {
     const openLane = () => collapseLaneButton.click();
     setTimeout(openLane, 0); // запускаем в setTimeout чтобы swim-lane раскрывались без остановки других процессов
   }
-};
+}
 
 // функции падающего листа для осени
 function setLeafColor() {
