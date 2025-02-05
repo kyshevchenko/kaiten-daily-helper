@@ -1,7 +1,6 @@
 let windowOpen = false;
-let dailyList = []; // Список для отображения кадого следующего спикера
-let speakersCount; // Количество спикеров для прогресс-бара // TODO убрать в функции
-let scrollTimer; // для корректной прокрутки к элементу с позиционированием вверху экрана
+let dailyList = [];
+let speakersCount;// TODO убрать в функции
 
 const isWinterTime = getSeason() === "winter";
 const seasonAccesories = {
@@ -169,7 +168,6 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-    clearTimeout(scrollTimer); // убираем таймаут скролла предыдущего клика
 
     // Находим все названия досок
     const boardTitleElements = document.querySelectorAll(
