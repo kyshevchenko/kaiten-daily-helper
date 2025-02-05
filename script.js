@@ -197,34 +197,24 @@ async function createWindow() {
       const isBoardTitleElem =
         matchingElements[0].getAttribute("data-test") === "board-title";
 
-      const laneContainer = matchingElements[0].closest('[data-test="lane"]');
+      const lane = matchingElements[0].closest('[data-test="lane"]');
 
       if (isBoardTitleElem) {
-        boardContainer.scrollIntoView({
-          // TODO вынести в функцию, убрать дублирование
-          behavior: "smooth",
-          block: "start",
-        });
+        const draggableBoard = boardContainer.querySelector(".draggableBoard");
+        scrollToElem(draggableBoard);
 
         return;
-      } else if (laneContainer) {
-        laneContainer.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+      } else if (lane) {
+        scrollToElem(lane);
 
         setTimeout(() => {
-          // Прокручиваем контейнер немного вниз
-          const scrollContainer = laneContainer.parentElement;
-          scrollContainer.style.overflow = "auto";
-          scrollContainer.scrollTop += 100;
+          const laneContainer = lane.parentElement;
+          laneContainer.style.overflow = "auto";
+          laneContainer.scrollTop += 100;
         }, 500);
         return;
       } else {
-        matchingElements[0].scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        scrollToElem(matchingElements[0]);
       }
     } else {
       name &&
@@ -261,10 +251,8 @@ async function createWindow() {
     speakersCount = dailyList.length; // Уcтанавливаем количество в прогресс-бар
     clearProgress(); // очищаем прогресс-бар
 
-    // Проверяем какой выбран режим списка (последовательный или рандом)?
     const isRandomMode =
       document.querySelector(".switch-checkbox").checked === true;
-    // перемешиваем список, если isRandomMode
     if (isRandomMode) shuffleArray(dailyList);
 
     openBoards(); // Раскрываем доски, если свернуты
@@ -277,6 +265,12 @@ async function createWindow() {
       'div[role="button"][data-test="lane-title-text"]'
     );
 
+    // Находим все элементы согласно отмеченному списку спикеров
+    const matchingElements = [
+      ...boardTitleElements,
+      ...laneTitleElements,
+    ].filter((e) => dailyList.includes(e.textContent.trim()));
+
     if (laneTitleElements.length) {
       const allLanes = document.querySelectorAll('div[data-test="lane"]');
 
@@ -286,21 +280,17 @@ async function createWindow() {
         if (!columns.length) uncollapseCurrentLane(lane);
       }
 
-      // ищем все доски согласно отмеченному списку спикеров
-      for (const name of dailyList) {
-        const matchingElements = [...boardTitleElements, ...laneTitleElements].filter(
-          (element) => {
-            return element.textContent.trim() === name;
-          }
+      if (!matchingElements.length) {
+        changeSpeakerField(
+          "Раскройте доски или смените страницу. Не все имена найдены."
         );
-        if (!matchingElements.length) {
-          changeSpeakerField("Раскройте доски или смените страницу. Не все имена найдены.");
-          hasKaitenElems = false;
-        }
+        hasKaitenElems = false;
       }
     } else {
       console.log("Kaiten daily helper: Kaiten board not found");
-      changeSpeakerField("Раскройте доски или смените страницу. Не все имена найдены.");
+      changeSpeakerField(
+        "Раскройте доски или смените страницу. Не все имена найдены."
+      );
       hasKaitenElems = false;
     }
 
@@ -309,8 +299,7 @@ async function createWindow() {
     } порядок)`;
 
     setTimeout(() => {
-      const firstLaneElem = laneTitleElements[0];
-      scrollToText(firstLaneElem.textContent.trim());
+      scrollToText(boardTitleElements[0].textContent.trim());
       toggleClasses(loaderSvg, ["loader-effect"]);
       toggleDisableButton(nextNameButton, false);
       toggleDisableButton(generateNewListButton, false);
@@ -337,7 +326,7 @@ async function createWindow() {
   // Слушатель кнопки start
   generateNewListButton.addEventListener("click", generateList);
 
-  // Переключение следующего спикера // TODO нужно переписать всю логику слушателя
+  // Переключение следующего спикера
   nextNameButton.addEventListener("click", () => {
     setProgress();
     scrollToText(dailyList[0]);
@@ -358,14 +347,9 @@ async function createWindow() {
   document
     .getElementById("button-generate-own-list")
     .addEventListener("click", () => {
-      if (!inputNames.value) return; // TODO убрать всю логику в saveListToStorage()
+      if (!inputNames.value) return;
 
-      const namesArray = inputNames.value
-        .replace(/\n/g, "")
-        .split(",")
-        .map((e) => e.trim());
-
-      const sortedListNames = saveListToStorage(namesArray);
+      const sortedListNames = saveListToStorage(inputNames);
 
       if (!sortedListNames) {
         changeSpeakerField(
@@ -381,7 +365,7 @@ async function createWindow() {
       if (santaHat) toogleDisplayingElem(santaHat);
       list.innerHTML = generateHTMLList(sortedListNames);
 
-      // слушатель label имен в новом списке //TODO убрать дублирование (вынести в функции все слушатели)
+      // слушатель label имен в новом списке
       const labels = Array.from(document.getElementsByClassName("label-name"));
       labels.forEach((e) =>
         e.addEventListener("click", () => {
@@ -667,10 +651,7 @@ async function createWindow() {
         const firstBoard = document.querySelector(
           '[data-test="board-container"]'
         );
-        firstBoard.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        scrollToElem(firstBoard);
 
         toogleCollapseButton(
           "releaseButton",

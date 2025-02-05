@@ -34,8 +34,11 @@ const toggleClasses = (elem, classesArray) => {
 };
 
 // сохранение своего списка в хранлище Хрома
-function saveListToStorage(newList) {
-  // TODO добавить и работу с досками (поиск в названии досок, а не только в swim-lane элементах) + добавить логику для !laneTitleElements.length => return
+function saveListToStorage(inputNames) {
+  const newList = inputNames.value
+    .replace(/\n/g, "")
+    .split(",")
+    .map((e) => e.trim());
 
   // Находим все названия досок
   const boardTitleElements = document.querySelectorAll(
@@ -163,3 +166,11 @@ function animateLeaf() {
   });
 }
 // функции падающего листа для осени
+
+const scrollToElem = (elem) => {
+  elem.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+    inline: "start",
+  });
+};
