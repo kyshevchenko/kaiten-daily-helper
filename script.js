@@ -1,6 +1,6 @@
 let windowOpen = false;
 let dailyList = [];
-let speakersCount;// TODO убрать в функции
+let speakersCount; // TODO убрать в функции
 
 const isWinterTime = getSeason() === "winter";
 const seasonAccesories = {
@@ -168,7 +168,6 @@ async function createWindow() {
 
   // Функция для авто-скролла к спикеру
   function scrollToText(name) {
-
     // Находим все названия досок
     const boardTitleElements = document.querySelectorAll(
       'div[role="presentation"][data-test="board-title"]'
@@ -522,12 +521,17 @@ async function createWindow() {
       let table = "";
 
       for (const i in info) {
+        const responsibleName =
+          info[i].responsible.length < 29
+            ? info[i].responsible
+            : info[i].responsible.slice(0, 25) + "...";
+
         table += `
         <tr class="custom-table-row" data-id="${info[i].ID}">
           <td>${info[i].name}</td>
           <td>${info[i].ID}</td>
           <td>${info[i].status}</td>
-          <td class="img-cell">${info[i].avatar} ${info[i].responsible}</td>
+          <td class="img-cell" >${info[i].avatar}${responsibleName}</td>
         </tr>
         `;
       }
@@ -593,7 +597,7 @@ async function createWindow() {
       navigator.clipboard.writeText(taskNamesText);
     });
 
-    // Слушатель столбца ID для копирования инф в гит
+    // Слушатель столбца ID с копированием текста для оформления задач в гит
     const idColumnHeader = document.querySelector(".id-column-header");
     idColumnHeader.addEventListener("click", () => {
       navigator.clipboard.writeText(gitTaskList);
