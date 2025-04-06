@@ -81,7 +81,7 @@ async function createWindow() {
 
           <div class="tooltip-container">
              <button id="button-display-release-table">${releaseSvg}</button>
-             <p class="tooltip">Показать/скрыть таблицу релиза</p>
+             <p class="tooltip">Открыть окно с задачами</p>
           </div>
 
           <div class="tooltip-container">
@@ -91,7 +91,7 @@ async function createWindow() {
         </div>
 
         <div id="form-create-list">
-          <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую. Имена должны полностью совпадать с названиями досок."></textarea>
+          <textarea class="input-names" id="input-names" type="text" placeholder="Впиши имена через запятую. Они должны полностью совпадать с названиями досок."></textarea>
           <br/>
           <br/>
           <button class="bubbly-button" id="button-generate-own-list">Сохранить</button>
@@ -474,7 +474,6 @@ async function createWindow() {
 
     // Копирование всех данных из таблицы
     const tableContent = document.querySelector('[data-testid="some"]');
-    console.log("tableContent --->", tableContent)
     const childDivs = Array.from(tableContent.children).filter(
       (child) => child.tagName === "DIV"
     );

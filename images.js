@@ -50,10 +50,21 @@ const progressBarSvg = `
 `;
 
 const releaseSvg = `
-<svg width="25" height="25" viewBox="0 0 22 22">
-  <title>Откройте релиз в Кайтене и нажмите R</title>
-  <rect width="30" height="30" fill="none"/>
-  <path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2m0,18a8,8,0,1,1,8-8,8,8,0,0,1-8,8m.25-6.73H10.81V16.5H9V7.71h3.26a3.73,3.73,0,0,1,2.4.69,2.39,2.39,0,0,1,.84,2,2.7,2.7,0,0,1-.39,1.5,2.59,2.59,0,0,1-1.18,1l1.9,3.59v.1H13.89l-1.64-3.23m-1.44-1.46h1.46a1.5,1.5,0,0,0,1.05-.35,1.24,1.24,0,0,0,.37-1,1.3,1.3,0,0,0-.35-1,1.43,1.43,0,0,0-1.08-.35H10.81Z"/>
+<svg width="25" height="25" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+  <title>Список задач — 4 строки с отступами</title>
+  <circle cx="11" cy="11" r="10" stroke="black" stroke-width="2" fill="none" />
+
+  <!-- 1 строка  -->
+  <circle cx="7" cy="8.05" r="1.2" fill="black"/>
+  <line x1="9.5" y1="8.05" x2="16" y2="8.05" stroke="black" stroke-width="1.2"/>
+
+  <!-- 2 строка -->
+  <circle cx="7" cy="12.1" r="1.2" fill="black"/>
+  <line x1="9.5" y1="12.1" x2="16" y2="12.1" stroke="black" stroke-width="1.2"/>
+
+  <!-- 3 строка  -->
+  <circle cx="7" cy="15.65" r="1.2" fill="black"/>
+  <line x1="9.5" y1="15.65" x2="16" y2="15.65" stroke="black" stroke-width="1.2"/>
 </svg>
 `;
 
@@ -165,8 +176,7 @@ const christmasLightsSVG = `
 </svg>
 `;
 
-const iciclesSVG = 
-`<svg class="icecles" enable-background="new 0 0 512 512" viewBox="0 0 512 512">
+const iciclesSVG = `<svg class="icecles" enable-background="new 0 0 512 512" viewBox="0 0 512 512">
   <g>
     <path d="m480.934 15h-192.785c-4.142 0-7.5 3.358-7.5 7.5s3.358 7.5 7.5 7.5c18.298 0 33.184 14.886 33.184 33.184v48.216c0 3.979 1.58 7.793 4.394 10.607l28.598 28.598 15.359 107.517c.996 6.971 6.707 12.311 13.729 12.837 10.009.748 14.482-7.293 15.488-10.648l48.2-160.667c.42-1.398.633-2.85.633-4.31v-32.15c0-18.298 14.886-33.184 33.2-33.184 4.142 0 7.5-3.358 7.5-7.5s-3.358-7.5-7.5-7.5z" fill="#cdf">
     </path>
