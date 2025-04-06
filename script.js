@@ -91,7 +91,7 @@ async function createWindow() {
         </div>
 
         <div id="form-create-list">
-          <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую"></textarea>
+          <textarea class="input-names" id="input-names" type="text" placeholder="Впиши сюда имена через запятую. Имена должны полностью совпадать с названиями досок."></textarea>
           <br/>
           <br/>
           <button class="bubbly-button" id="button-generate-own-list">Сохранить</button>
