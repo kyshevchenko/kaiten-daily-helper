@@ -473,7 +473,8 @@ async function createWindow() {
     tableViewValue.click();
 
     // Копирование всех данных из таблицы
-    const tableContent = document.querySelector('[data-test="some"]');
+    const tableContent = document.querySelector('[data-testid="some"]');
+    console.log("tableContent --->", tableContent)
     const childDivs = Array.from(tableContent.children).filter(
       (child) => child.tagName === "DIV"
     );
