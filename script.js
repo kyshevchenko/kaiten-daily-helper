@@ -493,7 +493,7 @@ async function createWindow() {
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
-      if (!tasksInfo[0]?.textContent) tasksInfo.splice(0, 6);
+      if (!tasksInfo[0]?.textContent || !taskNames[count - 1]?.textContent) tasksInfo.splice(0, 6);
 
       const avatarData = tasksInfo[2]?.querySelector("img");
       const avatar = avatarData ? `<img src=${avatarData.src}/>` : "";
