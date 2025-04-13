@@ -51,7 +51,6 @@ const progressBarSvg = `
 
 const releaseSvg = `
 <svg width="25" height="25" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
-  <title>Список задач — 4 строки с отступами</title>
   <circle cx="11" cy="11" r="10" stroke="black" stroke-width="2" fill="none" />
 
   <!-- 1 строка  -->

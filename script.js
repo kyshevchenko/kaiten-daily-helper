@@ -451,7 +451,7 @@ async function createWindow() {
 
     const dporMenuButton = document.querySelector('[aria-haspopup="listbox"]');
     if (!dporMenuButton) {
-      console.log("Kaiten daily helper: release table not found!");
+      console.log("Kaiten daily helper: children tasks not found!");
 
       return;
     }
@@ -493,26 +493,27 @@ async function createWindow() {
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
-      if (!tasksInfo[0].textContent) tasksInfo.splice(0, 6);
+      if (!tasksInfo[0]?.textContent) tasksInfo.splice(0, 6);
 
-      const avatarData = tasksInfo[2].querySelector("img");
+      const avatarData = tasksInfo[2]?.querySelector("img");
       const avatar = avatarData ? `<img src=${avatarData.src}/>` : "";
 
       info[count] = {
-        name: taskNames[count - 1].textContent,
-        ID: tasksInfo[0].textContent,
-        status: tasksInfo[1].textContent,
+        name: taskNames[count - 1]?.textContent || '',
+        ID: tasksInfo[0]?.textContent || '',
+        status: tasksInfo[1]?.textContent || '',
         avatar,
-        responsible: tasksInfo[2].textContent,
-        tags: tasksInfo[3].textContent,
+        responsible: tasksInfo[2]?.textContent || '',
+        tags: tasksInfo[3]?.textContent,
       };
       tasksInfo.splice(0, 6);
       count++;
+
     }
     const gitTaskList = taskNames
       .map((e, i) => {
         const id = info[i + 1].ID;
-        return `- [ABP-${id}](https://kaiten.x5.ru/space/3260/card/${id}) ${e.textContent}`;
+        return `- [ABP-${id}](https://kaiten.x5.ru/space/3260/card/${id}) ${e?.textContent}`;
       })
       .join("\n");
 
@@ -522,9 +523,9 @@ async function createWindow() {
 
       for (const i in info) {
         const responsibleName =
-          info[i].responsible.length < 29
+          info[i].responsible?.length < 29
             ? info[i].responsible
-            : info[i].responsible.slice(0, 25) + "...";
+            : info[i].responsible?.slice(0, 25) + "...";
 
         table += `
         <tr class="custom-table-row" data-id="${info[i].ID}">
