@@ -649,26 +649,26 @@ async function createWindow() {
     const lockButton = event.target.closest(".blockedCard");
     if (!lockButton) return;
 
-    // Получаем данные задачи
     const id = lockButton.id;
     const taskElement = lockButton.closest("[data-task-id]");
 
-    // Создаем попапер
+    // Создаем попапер с анимацией загрузки
     const popover = document.createElement("div");
     popover.className = "blocked-popover";
     popover.innerHTML = `
-    <div class="popover-content">
-      <h3>Blocked</h3>
-    </div>
-  `;
+      <div class="popover-content">
+        <h3>Blocked</h3>
+        <div class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+      </div>
+    `;
 
-    // Позиционирование
+    // Позиционируем попапер рядом с кнопкой
     const rect = lockButton.getBoundingClientRect();
     popover.style.position = "absolute";
     popover.style.left = `${rect.left}px`;
     popover.style.top = `${rect.bottom + 5}px`;
-
-    // Добавляем в DOM
     document.body.appendChild(popover);
 
     // Закрытие при клике вне попапера
@@ -683,26 +683,41 @@ async function createWindow() {
 
     // Клик по оригинальной кнопке
     tasksData[id].originBlockButton.click();
-  });
 
-  // Стили для попапера
-  const style = document.createElement("style");
-  style.textContent = `
-  .blocked-popover {
-    background: black;    
-    border-radius: 4px;
-    padding: 10px;
-    z-index: 100000;
-    min-width: 200px;
-  }
-  .blocked-popover h3 {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    color: white;
-  }
-  }
-`;
-  document.head.appendChild(style);
+    // Функция для проверки оригинального поповера
+    const checkOriginalPopover = () => {
+      const originalPopover = document.querySelector('[role="tooltip"]');
+      console.log("originalPopover", originalPopover.textContent)
+      if (originalPopover) {
+        const content = originalPopover.querySelector(".ProseMirror p");
+        if (content && content.textContent.trim()) {
+          // Нашли контент - копируем в наш поповер
+          popover.querySelector(".popover-content").innerHTML = `
+            <h3>Blocked</h3>
+            <div class="blocked-content">${content.innerHTML}</div>
+            <p class="blocked-info">${
+              originalPopover.querySelector(".MuiListItemText-secondary span")
+                .textContent
+            }</p>
+          `;
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Запускаем проверку с интервалом
+    const intervalTime = 200;
+    const timeout = 10000;
+    const startTime = Date.now();
+
+    const checkInterval = setInterval(() => {
+      if (checkOriginalPopover() || Date.now() - startTime > timeout) {
+        clearInterval(checkInterval);
+        popover.querySelector(".loading-container")?.remove();
+      }
+    }, intervalTime);
+  });
 
   // Слушатель open-boards-button кнопки
   openCollapseBoardsButton.addEventListener("click", () => {
