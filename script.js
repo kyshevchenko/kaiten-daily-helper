@@ -1,6 +1,7 @@
 let windowOpen = false;
 let dailyList = [];
 let speakersCount; // TODO убрать в функции
+let tasksData;
 
 const isWinterTime = getSeason() === "winter";
 const seasonAccesories = {
@@ -393,7 +394,11 @@ async function createWindow() {
   /* Вспомогательные функции для слушателей и удаления слушателей */
   // Функция для обработки кликов по строкам таблицы
   const handleRowClick = (event) => {
+    if (event.target.closest(".blockedCard")) return;
+
     const taskId = event.currentTarget.getAttribute("data-id");
+    if (!taskId) return;
+
     const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
     window.open(link, "_blank");
   };
@@ -477,43 +482,77 @@ async function createWindow() {
       (child) => child.tagName === "DIV"
     );
 
-    // Получаем все элементы <p> внутри второго дочернего <div> (все имена тасок)
-    const pElems = childDivs[1].querySelectorAll("p");
-    const taskNames = Array.from(pElems);
-    const taskNamesText = taskNames.map((e) => e.textContent).join("\n");
-    const taskCount = taskNames.length;
-
     // Получаем всю остальную инфу по таскам
     const tasksInfo = Array.from(childDivs[2].children).filter(
       (child) => child.tagName === "DIV"
     );
-
     tasksInfo.splice(0, 6); // Удаляем первые 7 элементов для дальнейшей корректной работы
+
+    // Получаем все названия задач и признак блокировки
+    tasksData = Array.from(childDivs[1].querySelectorAll("p, a")).map(
+      (elem, i) => {
+        // Находим ближайшего родителя-дива (можно уточнить селектор при необходимости)
+        const parentDiv = elem.closest("div");
+
+        // Проверяем наличие блокировки в родительском элементе
+        const blockedCardButton = parentDiv.querySelector(
+          '[aria-label="Lock"]'
+        );
+        const hasBlocked = parentDiv ? blockedCardButton !== null : false;
+
+        const blockedSvgWithId = hasBlocked
+          ? blockedCardSvg.replace("<svg", `<svg id="${i}"`)
+          : "";
+
+        const taskDescription = elem.textContent
+          ? `${elem.textContent}${blockedSvgWithId}`
+          : "";
+
+        return {
+          name: taskDescription,
+          originBlockButton: blockedCardButton,
+          elementType: elem.tagName.toLowerCase(), // для отладки
+        };
+      }
+    );
     const info = {}; // хранение всей инф по таскам
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
-      if (!tasksInfo[0]?.textContent || !taskNames[count - 1]?.textContent) tasksInfo.splice(0, 6);
+      if (
+        !tasksInfo[0]?.textContent ||
+        tasksData[count - 1]?.name === "1 archived card"
+      )
+        tasksInfo.splice(0, 6);
 
       const avatarData = tasksInfo[2]?.querySelector("img");
       const avatar = avatarData ? `<img src=${avatarData.src}/>` : "";
 
       info[count] = {
-        name: taskNames[count - 1]?.textContent || '',
-        ID: tasksInfo[0]?.textContent || '',
-        status: tasksInfo[1]?.textContent || '',
+        name: tasksData[count - 1]?.name,
+        ID: tasksInfo[0]?.textContent || "",
+        status: tasksInfo[1]?.textContent || "",
         avatar,
-        responsible: tasksInfo[2]?.textContent || '',
+        responsible: tasksInfo[2]?.textContent || "",
         tags: tasksInfo[3]?.textContent,
       };
+
+      if (tasksData[count - 1]?.name === "1 archived card") {
+        delete info[count]; // удаляем пока архивные таски
+      }
+
       tasksInfo.splice(0, 6);
       count++;
-
     }
-    const gitTaskList = taskNames
-      .map((e, i) => {
-        const id = info[i + 1].ID;
-        return `- [ABP-${id}](https://kaiten.x5.ru/space/3260/card/${id}) ${e?.textContent}`;
+    tasksData = tasksData.filter((e) => e.elementType !== "a"); // удаляем пока архивные таски
+    const taskNamesText = tasksData.map((e) => e.name);
+    const taskCount = tasksData.length;
+
+    const gitTaskList = tasksData // для копирования текста по колонке ID
+      .map((e) => {
+        const { ID } = Object.values(info).find((val) => val.name === e.name);
+
+        return `- [ABP-${ID}](https://kaiten.x5.ru/space/3260/card/${ID}) ${e?.name}`;
       })
       .join("\n");
 
@@ -604,6 +643,66 @@ async function createWindow() {
       navigator.clipboard.writeText(gitTaskList);
     });
   });
+
+  // Слушатель кнопок блокировки задачи
+  document.addEventListener("click", (event) => {
+    const lockButton = event.target.closest(".blockedCard");
+    if (!lockButton) return;
+
+    // Получаем данные задачи
+    const id = lockButton.id;
+    const taskElement = lockButton.closest("[data-task-id]");
+
+    // Создаем попапер
+    const popover = document.createElement("div");
+    popover.className = "blocked-popover";
+    popover.innerHTML = `
+    <div class="popover-content">
+      <h3>Blocked</h3>
+    </div>
+  `;
+
+    // Позиционирование
+    const rect = lockButton.getBoundingClientRect();
+    popover.style.position = "absolute";
+    popover.style.left = `${rect.left}px`;
+    popover.style.top = `${rect.bottom + 5}px`;
+
+    // Добавляем в DOM
+    document.body.appendChild(popover);
+
+    // Закрытие при клике вне попапера
+    const closePopover = (e) => {
+      if (!popover.contains(e.target) && e.target !== lockButton) {
+        popover.remove();
+        document.removeEventListener("click", closePopover);
+      }
+    };
+
+    setTimeout(() => document.addEventListener("click", closePopover), 0);
+
+    // Клик по оригинальной кнопке
+    tasksData[id].originBlockButton.click();
+  });
+
+  // Стили для попапера
+  const style = document.createElement("style");
+  style.textContent = `
+  .blocked-popover {
+    background: black;    
+    border-radius: 4px;
+    padding: 10px;
+    z-index: 100000;
+    min-width: 200px;
+  }
+  .blocked-popover h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: white;
+  }
+  }
+`;
+  document.head.appendChild(style);
 
   // Слушатель open-boards-button кнопки
   openCollapseBoardsButton.addEventListener("click", () => {

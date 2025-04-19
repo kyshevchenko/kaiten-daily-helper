@@ -574,3 +574,7 @@ min-height: 30px;
   transform: scaleX(-1) rotate(15deg);
 }
 /* Зимние новогодние стили */
+
+.blockedCard {
+  vertical-align: middle;
+}
