@@ -399,7 +399,7 @@ async function createWindow() {
     const taskId = event.currentTarget.getAttribute("data-id");
     if (!taskId) return;
 
-    const link = `https://kaiten.x5.ru/space/3260/card/${taskId}`;
+    const link = `https://kaiten.x5.ru/space/16039/card/${taskId}`;
     window.open(link, "_blank");
   };
 
@@ -552,7 +552,7 @@ async function createWindow() {
       .map((e) => {
         const { ID } = Object.values(info).find((val) => val.name === e.name);
 
-        return `- [ABS-${ID}](https://kaiten.x5.ru/space/3260/card/${ID}) ${e?.name}`;
+        return `- [ABS-${ID}](https://kaiten.x5.ru/space/16039/card/${ID}) ${e?.name}`;
       })
       .join("\n");
 
