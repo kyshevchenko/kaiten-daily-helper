@@ -552,7 +552,7 @@ async function createWindow() {
       .map((e) => {
         const { ID } = Object.values(info).find((val) => val.name === e.name);
 
-        return `- [ABP-${ID}](https://kaiten.x5.ru/space/3260/card/${ID}) ${e?.name}`;
+        return `- [ABS-${ID}](https://kaiten.x5.ru/space/3260/card/${ID}) ${e?.name}`;
       })
       .join("\n");
 
