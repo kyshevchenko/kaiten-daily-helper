@@ -169,7 +169,7 @@ function animateLeaf() {
 
 const scrollToElem = (elem) => {
   elem.scrollIntoView({
-    behavior: "smooth",
+    behavior: "auto",
     block: "start",
     inline: "start",
   });
