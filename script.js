@@ -55,7 +55,7 @@ async function createWindow() {
     <div id="checkbox-container">
       <input class="checkbox-name" type="checkbox" checked="true" id="name${i}" name="${e}" placeholder="Name ${i}">
       <label class="label-name">${e}</label><br>
-    </div>`
+    </div>`,
       )
       .join("");
   };
@@ -137,7 +137,7 @@ async function createWindow() {
 
   // Данные для релиз-таблицы
   const buttonDisplayReleaseTable = document.getElementById(
-    "button-display-release-table"
+    "button-display-release-table",
   );
 
   // Переменные прогресс-бара
@@ -171,25 +171,25 @@ async function createWindow() {
   function scrollToText(name) {
     // Находим все названия досок
     const boardTitleElements = document.querySelectorAll(
-      'div[role="presentation"][data-test="board-title"]'
+      'div[role="presentation"][data-test="board-title"]',
     );
 
     // TODO необходимо будет объединить с логикой скролла и по названиям досок (аналогично в saveListToStorage())
     const laneTitleElements = document.querySelectorAll(
-      'div[role="button"][data-test="lane-title-text"]'
+      'div[role="button"][data-test="lane-title-text"]',
     );
 
     const allBoardsAndLanes = [...boardTitleElements, ...laneTitleElements];
 
     // Отфильтровываем, оставляем все элементы с именами спикеров
     const matchingElements = allBoardsAndLanes.filter(
-      (e) => e.textContent.trim() === name
+      (e) => e.textContent.trim() === name,
     );
 
     if (matchingElements.length > 0) {
       // находим все доски на странице и элементы с именами на ней
       const boardContainer = matchingElements[0].closest(
-        '[data-test="board-container"]'
+        '[data-test="board-container"]',
       );
 
       const isBoardTitleElem =
@@ -256,11 +256,11 @@ async function createWindow() {
     openBoards(); // Раскрываем доски, если свернуты
 
     const boardTitleElements = document.querySelectorAll(
-      'div[role="presentation"][data-test="board-title"]'
+      'div[role="presentation"][data-test="board-title"]',
     );
 
     const laneTitleElements = document.querySelectorAll(
-      'div[role="button"][data-test="lane-title-text"]'
+      'div[role="button"][data-test="lane-title-text"]',
     );
 
     // Находим все элементы согласно отмеченному списку спикеров
@@ -280,14 +280,14 @@ async function createWindow() {
 
       if (!matchingElements.length) {
         changeSpeakerField(
-          "Раскройте доски или смените страницу. Не все имена найдены."
+          "Раскройте доски или смените страницу. Не все имена найдены.",
         );
         hasKaitenElems = false;
       }
     } else {
       console.log("Kaiten daily helper: Kaiten board not found");
       changeSpeakerField(
-        "Раскройте доски или смените страницу. Не все имена найдены."
+        "Раскройте доски или смените страницу. Не все имена найдены.",
       );
       hasKaitenElems = false;
     }
@@ -318,7 +318,7 @@ async function createWindow() {
   labels.forEach((e) =>
     e.addEventListener("click", () => {
       scrollToText(e.textContent);
-    })
+    }),
   );
 
   // Слушатель кнопки start
@@ -352,7 +352,7 @@ async function createWindow() {
       if (!sortedListNames) {
         changeSpeakerField(
           "Некоторые имена не были найдены. Измените список.",
-          "black"
+          "black",
         );
         return;
       }
@@ -368,7 +368,7 @@ async function createWindow() {
       labels.forEach((e) =>
         e.addEventListener("click", () => {
           scrollToText(e.textContent);
-        })
+        }),
       );
       changeSpeakerField("Новый список был успешно создан!");
     });
@@ -461,7 +461,7 @@ async function createWindow() {
       return;
     }
 
-    // Эмуляция нажатия клавиши "ArrowDown"
+    // Эмуляция нажатия клавиши "ArrowDown", чтобы открыть список задач в другом виде Table
     const keyDownEvent = new KeyboardEvent("keydown", {
       key: "ArrowDown",
       code: "ArrowDown",
@@ -479,12 +479,12 @@ async function createWindow() {
     // Копирование всех данных из таблицы
     const tableContent = document.querySelector('[data-testid="some"]');
     const childDivs = Array.from(tableContent.children).filter(
-      (child) => child.tagName === "DIV"
+      (child) => child.tagName === "DIV",
     );
 
     // Получаем всю остальную инфу по таскам
     const tasksInfo = Array.from(childDivs[2].children).filter(
-      (child) => child.tagName === "DIV"
+      (child) => child.tagName === "DIV",
     );
     tasksInfo.splice(0, 6); // Удаляем первые 7 элементов для дальнейшей корректной работы
 
@@ -493,16 +493,37 @@ async function createWindow() {
       (elem, i) => {
         // Находим ближайшего родителя-дива (можно уточнить селектор при необходимости)
         const parentDiv = elem.closest("div");
+        // console.log("parentDiv:", parentDiv);
 
         // Проверяем наличие блокировки в родительском элементе
         const blockedCardButton = parentDiv.querySelector(
-          '[aria-label="Lock"]'
+          '[aria-label="Lock"]',
         );
         const hasBlocked = parentDiv ? blockedCardButton !== null : false;
 
         const blockedSvgWithId = hasBlocked
           ? blockedCardSvg.replace("<svg", `<svg id="${i}"`)
           : "";
+
+        const elementType = elem.tagName.toLowerCase();
+
+        const taskType = parentDiv
+          ?.querySelector(".MuiAvatar-root")
+          .textContent?.trim();
+
+        const taskColor =
+          taskType === "З"
+            ? "#CFB046"
+            : taskType === "Д"
+              ? "#f44336"
+              : "#03a9f4";
+
+        const circleSvg = `
+          <svg width="24" height="24" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+           <circle cx="12" cy="12" r="11" fill="${taskColor}" stroke="none"/>
+           <text x="12" y="15" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">${taskType}</text>
+           </svg>
+          `;
 
         const taskDescription = elem.textContent
           ? `${elem.textContent}${blockedSvgWithId}`
@@ -511,9 +532,10 @@ async function createWindow() {
         return {
           name: taskDescription,
           originBlockButton: blockedCardButton,
-          elementType: elem.tagName.toLowerCase(), // для отладки
+          elementType, // для отладки
+          taskCircle: circleSvg,
         };
-      }
+      },
     );
     const info = {}; // хранение всей инф по таскам
     let count = 1; // счетчик количества тасок
@@ -530,6 +552,7 @@ async function createWindow() {
 
       info[count] = {
         name: tasksData[count - 1]?.name,
+        taskCircle: tasksData[count - 1]?.taskCircle,
         ID: tasksInfo[0]?.textContent || "",
         status: tasksInfo[1]?.textContent || "",
         avatar,
@@ -544,6 +567,7 @@ async function createWindow() {
       tasksInfo.splice(0, 6);
       count++;
     }
+
     tasksData = tasksData.filter((e) => e.elementType !== "a"); // удаляем пока архивные таски
     const taskNamesText = tasksData.map((e) => e.name);
     const taskCount = tasksData.length;
@@ -559,7 +583,6 @@ async function createWindow() {
     //Функция для наполнения таблицы
     const getTableContent = (info) => {
       let table = "";
-
       for (const i in info) {
         const responsibleName =
           info[i].responsible?.length < 29
@@ -568,7 +591,7 @@ async function createWindow() {
 
         table += `
         <tr class="custom-table-row" data-id="${info[i].ID}">
-          <td>${info[i].name}</td>
+          <td>${info[i].taskCircle} ${info[i].name}</td>
           <td>${info[i].ID}</td>
           <td>${info[i].status}</td>
           <td class="img-cell" >${info[i].avatar}${responsibleName}</td>
@@ -687,7 +710,7 @@ async function createWindow() {
     // Функция для проверки оригинального поповера
     const checkOriginalPopover = () => {
       const originalPopover = document.querySelector('[role="tooltip"]');
-      console.log("originalPopover", originalPopover.textContent)
+      // console.log("originalPopover", originalPopover.textContent);
       if (originalPopover) {
         const content = originalPopover.querySelector(".ProseMirror p");
         if (content && content.textContent.trim()) {
@@ -725,7 +748,7 @@ async function createWindow() {
     const toogleCollapseButton = (
       operationMoment,
       isNextNameButtonActive,
-      openBoardsSVG
+      openBoardsSVG,
     ) => {
       const isButtonPressed = operationMoment === "pressButton";
 
@@ -749,7 +772,7 @@ async function createWindow() {
     const openLanes = (
       isBoardsCollapsed,
       isNextNameButtonActive,
-      openBoardsSVG
+      openBoardsSVG,
     ) => {
       const allLanes = document.querySelectorAll('div[data-test="lane"]');
 
@@ -766,14 +789,14 @@ async function createWindow() {
       // Прокручиваем на самый верх страницы после раскрытия всех досок
       setTimeout(() => {
         const firstBoard = document.querySelector(
-          '[data-test="board-container"]'
+          '[data-test="board-container"]',
         );
         scrollToElem(firstBoard);
 
         toogleCollapseButton(
           "releaseButton",
           isNextNameButtonActive,
-          openBoardsSVG
+          openBoardsSVG,
         );
       }, 0);
     };
@@ -783,13 +806,13 @@ async function createWindow() {
       const isNextNameButtonActive = nextNameButton.disabled === false;
 
       const isBoardsCollapsed = openBoardsSVG.classList.contains(
-        "collapsed-boards-icon"
+        "collapsed-boards-icon",
       );
 
       toogleCollapseButton(
         "pressButton",
         isNextNameButtonActive,
-        openBoardsSVG
+        openBoardsSVG,
       );
 
       openBoards();
