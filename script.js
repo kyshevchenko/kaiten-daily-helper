@@ -496,8 +496,18 @@ async function createWindow() {
     ListViewValue.click();
     tableViewValue.click();
 
+    // Показываем архивные таски
+    const showArchiveTasksBtn = document.querySelector(
+      "[data-testid=button-cards-done]",
+    );
+    if (Boolean(showArchiveTasksBtn)) {
+      showArchiveTasksBtn.click();
+    }
+
     // Копирование всех данных из таблицы
-    const tableContent = document.querySelector('[data-testid="some"]');
+    const tableContent = document.querySelector(
+      '[data-testid="custom-properties-block"]',
+    );
     const childDivs = Array.from(tableContent.children).filter(
       (child) => child.tagName === "DIV",
     );
@@ -529,7 +539,7 @@ async function createWindow() {
 
         const taskType = parentDiv
           ?.querySelector(".MuiAvatar-root")
-          .textContent?.trim();
+          ?.textContent?.trim();
 
         const taskColor =
           taskType === "З"
@@ -561,6 +571,7 @@ async function createWindow() {
     let count = 1; // счетчик количества тасок
 
     while (tasksInfo.length > 0) {
+      // TODO: это условие больше не нужно, проверить и удалить
       if (
         !tasksInfo[0]?.textContent ||
         tasksData[count - 1]?.name === "1 archived card"
@@ -580,6 +591,7 @@ async function createWindow() {
         tags: tasksInfo[3]?.textContent,
       };
 
+      // TODO: это условие больше не нужно, проверить и удалить
       if (tasksData[count - 1]?.name === "1 archived card") {
         delete info[count]; // удаляем пока архивные таски
       }
@@ -588,8 +600,8 @@ async function createWindow() {
       count++;
     }
 
-    tasksData = tasksData.filter((e) => e.elementType !== "a"); // удаляем пока архивные таски
-    const taskNamesText = tasksData.map((e) => e.name);
+    tasksData = tasksData.filter((e) => e.elementType !== "a"); // удаляем пока архивные таски // TODO: больше не нужно, удалить
+    const taskNamesText = tasksData.map((e) => e.name).join("\n");
     const taskCount = tasksData.length;
 
     const gitTaskList = tasksData // для копирования текста по колонке ID
@@ -626,8 +638,8 @@ async function createWindow() {
     <table class="custom-table">
     <thead class="custom-table-head">
       <tr>
-        <th>Название задачи (${taskCount})${copySvg}</th>
-        <th class="id-column-header">ID</th>
+        <th>Название задачи (${taskCount})${copySvg}${copyWithLinksSvg}</th>
+        <th>ID</th>
         <th class="candle-activator">Статус</th>
         <th>Исполнитель
           <div class="window-button-container">${updateSvg} ${resizeWindow} ${closeIconSvg}</div>
@@ -680,9 +692,9 @@ async function createWindow() {
       navigator.clipboard.writeText(taskNamesText);
     });
 
-    // Слушатель столбца ID с копированием текста для оформления задач в гит
-    const idColumnHeader = document.querySelector(".id-column-header");
-    idColumnHeader.addEventListener("click", () => {
+    // / Слушатель для второй иконки копирования с копированием текста для оформления задач в гит
+    const copyWithLinksButton = document.querySelector(".copy-with-links-button");
+    copyWithLinksButton.addEventListener("click", () => {
       navigator.clipboard.writeText(gitTaskList);
     });
   });

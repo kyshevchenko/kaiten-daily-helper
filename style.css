@@ -545,11 +545,12 @@ tr td:first-child {
 .table-close-icon,
 .resize-window,
 .update-svg,
-.copy-button {
+.copy-button,
+.copy-with-links-button {
   cursor: pointer;
 }
 
-.copy-button {
+.copy-button, .copy-with-links-button {
   height: 18px;
   transform: scale(-1, 1);
   margin-left: 5px;
