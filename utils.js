@@ -8,7 +8,7 @@ const seasonsMonths = {
 const getSeason = () => {
   const month = new Date().getMonth() + 1;
   return Object.keys(seasonsMonths).find((s) =>
-    seasonsMonths[s].includes(month)
+    seasonsMonths[s].includes(month),
   );
 };
 
@@ -42,12 +42,12 @@ function saveListToStorage(inputNames) {
 
   // Находим все названия досок
   const boardTitleElements = document.querySelectorAll(
-    'div[role="presentation"][data-test="board-title"]'
+    'div[role="presentation"][data-test="board-title"]',
   );
 
   // находим все swim-lane
   const laneTitleElements = document.querySelectorAll(
-    'div[role="button"][data-test="lane-title-text"]'
+    'div[role="button"][data-test="lane-title-text"]',
   );
 
   const allBoardsAndLanes = [...boardTitleElements, ...laneTitleElements];
@@ -67,7 +67,7 @@ function saveListToStorage(inputNames) {
     });
 
     const targetIndex = allBoardsAndLanes.findIndex(
-      (e) => e === matchingElements[0]
+      (e) => e === matchingElements[0],
     );
 
     if (targetIndex === -1) return false; // возвращаем false, если хотя бы одно имя на доске на досках и swim-lanes не найдено
@@ -76,7 +76,7 @@ function saveListToStorage(inputNames) {
 
   // сортируем новый список
   const sortedListArray = Object.entries(namesIndexes).sort(
-    (a, b) => a[1] - b[1]
+    (a, b) => a[1] - b[1],
   );
   const sortedListNamesIndex = Object.fromEntries(sortedListArray);
   const sortedListNames = Object.keys(sortedListNamesIndex);
@@ -91,7 +91,7 @@ function saveListToStorage(inputNames) {
 // Функция для разворачивания досок
 function openBoards() {
   const allBoards = document.querySelectorAll(
-    'div[data-test="board-container"]'
+    'div[data-test="board-container"]',
   );
 
   if (!allBoards.length) {
@@ -104,7 +104,7 @@ function openBoards() {
 
     if (!allLanesOnBoard.length) {
       const collapseBoardButton = board.querySelector(
-        '[data-test="collapse-board-button"]'
+        '[data-test="collapse-board-button"]',
       );
       if (collapseBoardButton) {
         collapseBoardButton.click();
@@ -116,7 +116,7 @@ function openBoards() {
 // Функция для разворачивания одной выбранной swim-lane
 function uncollapseCurrentLane(lane) {
   const collapseLaneButton = lane.querySelector(
-    '[data-test="title-collapse-button"]'
+    '[data-test="title-collapse-button"]',
   );
   if (collapseLaneButton) {
     const openLane = () => collapseLaneButton.click();
@@ -169,6 +169,16 @@ function animateLeaf() {
 
 const scrollToElem = (elem) => {
   elem.scrollIntoView({
+    behavior: "auto",
+    block: "start",
+    inline: "start",
+  });
+};
+
+const scrollToTop = () => {
+  const boards = document.querySelectorAll(".boardTitle");
+
+  boards[0].scrollIntoView({
     behavior: "auto",
     block: "start",
     inline: "start",

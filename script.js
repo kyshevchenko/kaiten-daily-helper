@@ -182,9 +182,27 @@ async function createWindow() {
     const allBoardsAndLanes = [...boardTitleElements, ...laneTitleElements];
 
     // Отфильтровываем, оставляем все элементы с именами спикеров
-    const matchingElements = allBoardsAndLanes.filter(
-      (e) => e.textContent.trim() === name,
-    );
+    const matchingElements = allBoardsAndLanes.filter((e) => {
+      if (e.textContent.trim() !== name) return false;
+
+      // Ищем родительскую доску
+      const board = e.closest(".draggableBoard");
+
+      if (board) {
+        // Ищем внутри доски элемент с data-testid="board-title"
+        const boardTitleElement = board.querySelector(
+          '[data-testid="board-title"]',
+        );
+
+        if (boardTitleElement) {
+          // Проверяем, содержит ли заголовок или его дочерние элементы текст "Backlog"
+          const hasBacklog = boardTitleElement.textContent.includes("Backlog");
+          return !hasBacklog;
+        }
+      }
+
+      return true;
+    });
 
     if (matchingElements.length > 0) {
       // находим все доски на странице и элементы с именами на ней
@@ -195,23 +213,25 @@ async function createWindow() {
       const isBoardTitleElem =
         matchingElements[0].getAttribute("data-test") === "board-title";
 
-      const lane = matchingElements[0].closest('[data-test="lane"]');
+      const lane = matchingElements[0].closest('[data-test="lane-title"]');
 
       if (isBoardTitleElem) {
         const draggableBoard = boardContainer.querySelector(".draggableBoard");
+        scrollToTop();
         scrollToElem(draggableBoard);
-
         return;
       } else if (lane) {
-        scrollToElem(lane);
+        scrollToTop();
 
+        scrollToElem(lane);
         setTimeout(() => {
           const laneContainer = lane.parentElement;
           laneContainer.style.overflow = "auto";
-          laneContainer.scrollTop += 100;
+          laneContainer.scrollTop -300;
         }, 500);
         return;
       } else {
+        scrollToTop();
         scrollToElem(matchingElements[0]);
       }
     } else {
